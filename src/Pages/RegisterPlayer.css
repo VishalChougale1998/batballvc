@@ -1,0 +1,138 @@
+/* ===== MAIN BACKGROUND ===== */
+.view-container {
+    padding: 40px 20px;
+    background: #0f172a;
+    min-height: 100vh;
+    color: white;
+}
+
+
+/* ============================= */
+/* ===== LEAGUE GRID (LIST) ===== */
+/* ============================= */
+
+.league-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+
+    width: 100%;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* ===== CARD ===== */
+.league-card {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 15px;
+    color: white;
+
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    transition: 0.3s;
+}
+
+.league-card:hover {
+    transform: translateY(-5px);
+}
+
+/* ===== IMAGE ===== */
+.league-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* ===== TEXT ===== */
+.league-card h3 {
+    margin: 5px 0;
+}
+
+.league-card p {
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+
+/* ============================= */
+/* ===== FORM PAGE (FIXED) ===== */
+/* ============================= */
+
+.form-wrapper {
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-card {
+    width: 100%;
+    max-width: 420px;
+
+    background: #1e293b;
+    padding: 25px;
+    border-radius: 12px;
+    color: white;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* ===== INPUT ===== */
+.input-field {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+
+    border-radius: 6px;
+    border: none;
+    outline: none;
+
+    background: #334155;
+    color: white;
+}
+
+/* ===== INPUT FOCUS ===== */
+.input-field:focus {
+    border: 1px solid #22c55e;
+}
+
+/* ===== BUTTON ===== */
+.league-btn {
+    width: 100%;
+    margin-top: 12px;
+    background: #22c55e;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    color: black;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.league-btn:hover {
+    background: #16a34a;
+}
+
+
+/* ============================= */
+/* ===== RESPONSIVE ===== */
+/* ============================= */
+
+@media (max-width: 900px) {
+    .league-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .league-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .view-container {
+        padding: 20px 10px;
+    }
+}

@@ -1,0 +1,73 @@
+.league-card {
+    background: #1e293b;
+    border-radius: 12px;
+    overflow: hidden;
+
+    width: 100%;
+    /* important */
+    max-width: 350px;
+    /* 🔥 LIMIT SIZE */
+    margin: auto;
+
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.league-card:hover {
+    transform: translateY(-5px);
+}
+
+/* IMAGE */
+.league-img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+}
+
+/* BODY */
+.league-body {
+    padding: 15px;
+}
+
+.league-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* BUTTONS */
+.league-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btn-register {
+    flex: 1;
+    background: #facc15;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-auction {
+    flex: 1;
+    background: #22c55e;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* GRID FOR CARDS */
+.leagues-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+}

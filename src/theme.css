@@ -1,0 +1,27 @@
+/* BLACK-YELLOW THEME */
+
+:root {
+
+    --theme-name: black-yellow;
+
+    /* Primary colors */
+    --primary-black: #0f0f0f;
+    --secondary-black: #1a1a1a;
+
+    --primary-yellow: #ffc107;
+    --dark-yellow: #ff9800;
+
+    /* Text */
+    --text-light: #ffffff;
+    --text-dark: #000000;
+
+    /* Cards */
+    --card-bg: rgba(255, 255, 255, 0.08);
+
+}
+
+.footer-theme {
+    background: linear-gradient(135deg,
+            #0f0f0f,
+            #1a1a1a);
+}

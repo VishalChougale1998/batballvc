@@ -1,0 +1,281 @@
+/* App custom styles */
+* {
+  box-sizing: border-box;
+}
+
+.hero-section {
+  min-height: 100vh;
+  width: 100%;
+  background-image: url("/rs.jpg?v=1");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.hero-overlay {
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+}
+
+.hero-container {
+  position: relative;
+  height: 90vh;
+  overflow: hidden;
+}
+
+.hero-image {
+  height: 90vh;
+  object-fit: cover;
+  filter: brightness(60%);
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hero-content {
+  color: white;
+  max-width: 700px;
+  padding: 20px;
+}
+
+.hero-title {
+  font-size: 60px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.hero-text {
+  font-size: 20px;
+  margin-bottom: 30px;
+}
+
+.hero-buttons button {
+  min-width: 200px;
+  font-weight: 600;
+}
+
+.carousel-bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: 1s ease-in-out;
+  z-index: -1;
+}
+
+.league-card {
+  background: #1c1c1c;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transition: 0.3s;
+}
+
+.league-card:hover {
+  transform: translateY(-5px);
+}
+
+.league-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.league-content {
+  padding: 15px;
+  color: white;
+}
+
+/* Home page buttons */
+.home-btn {
+  padding: 15px 30px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 18px;
+  min-width: 220px;
+  margin: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.home-btn.primary {
+  background: linear-gradient(135deg, #ffc107, #ff9800);
+  color: #000;
+}
+
+.home-btn.primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+}
+
+.home-btn.secondary {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+}
+
+.home-btn.secondary:hover {
+  background: white;
+  color: #000;
+  transform: scale(1.05);
+}
+
+.home h1 {
+  font-size: 4rem;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.player-photo {
+  width: 40px !important;
+  height: 40px !important;
+  object-fit: cover !important;
+  border-radius: 6px !important;
+  display: block !important;
+}
+
+/* buttons */
+.white-round {
+  background: white;
+  color: black;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.green-round {
+  background: #22c55e;
+  color: black;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.delete-round {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.yellow-round {
+  background: #facc15;
+  color: black;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* home page css */
+/* ===== MAIN CONTAINER ===== */
+.home-container {
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  transition: 1s ease-in-out;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+
+  position: relative;
+}
+
+/* ===== DARK OVERLAY ===== */
+.home-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* ===== CONTENT ===== */
+.home-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* ===== TITLE ===== */
+.home-title {
+  font-size: 50px;
+  font-weight: bold;
+  color: #ffc107;
+}
+
+/* ===== SUBTITLE ===== */
+.home-subtitle {
+  font-size: 18px;
+  margin-top: 10px;
+}
+
+/* ===== BUTTONS ===== */
+.home-buttons {
+  margin-top: 30px;
+}
+
+/* ===== PRIMARY BUTTON ===== */
+.btn-primary {
+  background: #ffc107;
+  color: black;
+  padding: 12px 30px;
+  margin: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+}
+
+/* ===== SECONDARY BUTTON ===== */
+.btn-secondary {
+  background: #0d6efd;
+  color: white;
+  padding: 12px 30px;
+  margin: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-secondary:hover {
+  transform: scale(1.05);
+}

@@ -1,0 +1,253 @@
+/* ===== MAIN PAGE ===== */
+.auction-page {
+    background: #0f172a;
+    color: white;
+    /* height: 100vh; */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* margin-top: 100px; */
+}
+
+/* ===== TOP ===== */
+.top-bar {
+    padding: 15px;
+    display: flex;
+    gap: 10px;
+    margin-top: 50px;
+}
+
+/* ===== TEAM TABS ===== */
+.team-bar {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    margin-left: 15px;
+}
+
+.team-pill {
+    background: #334155;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.team-pill.active {
+    background: #22c55e;
+    color: black;
+}
+
+/* ===== MAIN LAYOUT ===== */
+.main-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* ===== LEFT PANEL ===== */
+.left-panel {
+    width: 30%;
+    padding: 10px;
+    background: #1e293b;
+    overflow-y: auto;
+    margin-left: 20px;
+}
+
+/* PLAYER ROW */
+.player-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    background: #334155;
+    margin-bottom: 10px;
+    padding: 10px;
+
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.player-row:hover {
+    background: #475569;
+}
+
+.player-row img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* ===== RIGHT PANEL ===== */
+.right-panel {
+    width: 70%;
+    padding: 20px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+/* ===== AUCTION CARD (FIXED) ===== */
+.auction-card {
+    display: flex;
+    gap: 20px;
+
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 15px;
+
+    width: 650px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* IMAGE */
+.card-left {
+    width: 200px;
+}
+
+.card-left img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+/* DETAILS */
+.card-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-right h2 {
+    margin-bottom: 5px;
+}
+
+.card-right p {
+    color: #94a3b8;
+}
+
+/* PRICE */
+.card-right h1 {
+    font-size: 30px;
+    margin: 10px 0;
+}
+
+/* BUTTONS */
+.bid-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.bid-buttons button {
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    background: #334155;
+    color: white;
+}
+
+.bid-buttons button:first-child {
+    background: #22c55e;
+}
+
+/* INPUT */
+.card-right input {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: none;
+}
+
+/* SELECT */
+.card-right select {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* SELL BUTTON */
+.sell-btn {
+    background: #22c55e;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ===== TEAM VIEW (PDF AREA) ===== */
+#pdf-content {
+    background: white;
+    color: black;
+    padding: 20px;
+
+    width: 900px;
+    margin: auto;
+}
+
+/* GRID */
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    padding: 20px;
+    /* margin-bottom: 70px; */
+}
+
+/* CARD */
+.team-card {
+    background: #1e293b;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+
+    text-align: center;
+    font-size: 12px;
+}
+
+.team-card img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.team-card button {
+    margin-top: 8px;
+    background: red;
+    color: white;
+    border: none;
+    padding: 6px;
+    border-radius: 5px;
+}
+
+.team-create {
+    background: #22c55e;
+    color: black;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.create-btn {
+    background: #22c55e;
+    color: black;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+}

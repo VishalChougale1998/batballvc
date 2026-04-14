@@ -1,0 +1,94 @@
+/* CreateLeague - Black-Yellow Theme */
+@import '../theme.css';
+
+.create-league-container {
+    min-height: 100vh;
+    background: radial-gradient(circle at top, var(--primary-black), #020617);
+    padding: 100px 20px;
+    font-family: Arial, sans-serif;
+    color: var(--text-light);
+}
+
+.create-league-card {
+    max-width: 500px;
+    margin: auto;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.create-league-title {
+    text-align: center;
+    color: var(--primary-yellow);
+    font-size: 28px;
+    margin-bottom: 30px;
+    font-weight: bold;
+    text-shadow: 0 2px 10px rgba(255, 193, 7, 0.5);
+}
+
+.create-league-input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.create-league-input::placeholder {
+    color: #aaa;
+}
+
+.create-league-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+    transform: scale(1.02);
+}
+
+.create-league-btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, var(--primary-yellow), var(--dark-yellow));
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 18px;
+    color: var(--text-dark) !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(255, 193, 7, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.create-league-btn:hover {
+    background: linear-gradient(135deg, #ffb300, #ff8c00);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(255, 193, 7, 0.6);
+}
+
+.create-league-success {
+    text-align: center;
+    color: var(--primary-yellow);
+    margin-top: 20px;
+    font-size: 18px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .create-league-container {
+        padding: 80px 15px;
+    }
+    
+    .create-league-card {
+        padding: 30px 20px;
+    }
+}
+
