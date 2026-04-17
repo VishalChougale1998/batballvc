@@ -1,85 +1,7 @@
-// // import { BrowserRouter, Routes, Route } from "react-router-dom";
-// // import Home from "./Pages/Home";
-// // import Leagues from "./Pages/Leagues";
-// // import Auction from "./Pages/Auction";
-// // import RegisterPlayer from "./Pages/RegisterPlayer";
-// // import RegistrationSuccess from "./Pages/RegistrationSuccess";
-// // import Admin from "./Pages/Admin";
-// // import AdminLogin from "./Pages/AdminLogin";
-// // import CreateLeague from "./Pages/CreateLeague";
-// // import FixedAdmin from "./Pages/FixedAdmin";
-// // import Navbar from "./Components/Navbar";
-
-// // function App() {
-// //   return (
-// //     <BrowserRouter>
-// //       <Navbar />
-// //       <Routes>
-// //         <Route path="/" element={<Home />} />
-// //         <Route path="/leagues" element={<Leagues />} />
-// //         <Route path="/leagues/:leagueId" element={<Leagues />} />
-// //         <Route path="/auction/:leagueId" element={<Auction />} />
-// //         <Route path="/register-player/:leagueId" element={<RegisterPlayer />} />
-// //         <Route path="/registration-success" element={<RegistrationSuccess />} />
-// //         <Route path="/admin" element={<Admin />} />
-// //         <Route path="/admin-login" element={<AdminLogin />} />
-// //         <Route path="/create-league" element={<CreateLeague />} />
-// //         <Route path="/fixed-admin" element={<FixedAdmin />} />
-// //       </Routes>
-// //     </BrowserRouter>
-// //   );
-// // }
-
-// // export default App;
-
-
-// import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
-// import CreateLeague from "./Pages/CreateLeague";
-// import Leagues from "./Pages/Leagues";
-// import RegisterPlayer from "./Pages/RegisterPlayer";
-// import Auction from "./Pages/Auction";
-// import Home from "./Pages/Home";
-// import Navbar from "./Components/Navbar";
-// import ViewLeagues from "./Pages/ViewLeagues";
-// import RegisterLeagues from "./Pages/RegisterLeagues";
-// import AdminLogin from "./Pages/AdminLogin";
-// import Admin from "./Pages/Admin";
-// import Footer from "./Components/Footer";
-
-// function App() {
-//   return (
-//     <Router>
-
-//       <Navbar />
-
-//       <Routes>
-//         <Route path="/" element={<Home />} />
-//         <Route path="/create-league" element={<CreateLeague />} />
-//         <Route path="/leagues" element={<Leagues />} />
-//         <Route path="/view-leagues" element={<ViewLeagues />} />
-//         <Route path="/register-leagues" element={<RegisterLeagues />} />
-//         <Route path="/admin" element={<AdminLogin />} />
-//         <Route path="/admin-panel" element={<Admin />} />
-
-//         {/* ✅ THIS IS THE IMPORTANT ONE */}
-//         <Route path="/register/:leagueId" element={<RegisterPlayer />} />
-
-//         <Route path="/auction/:leagueId" element={<Auction />} />
-//       </Routes>
-
-//       <Footer />
-
-//     </Router >
-//   );
-// }
-
-// export default App;
-
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import CreateLeague from "./Pages/CreateLeague";
+
 import Leagues from "./Pages/Leagues";
 import RegisterPlayer from "./Pages/RegisterPlayer";
 import Auction from "./Pages/Auction";
@@ -88,7 +10,6 @@ import Navbar from "./Components/Navbar";
 import ViewLeagues from "./Pages/ViewLeagues";
 import RegisterLeagues from "./Pages/RegisterLeagues";
 import AdminLogin from "./Pages/AdminLogin";
-// import Admin from "./Pages/Admin";
 import FixedAdmin from "./Pages/FixedAdmin";
 import Footer from "./Components/Footer";
 
