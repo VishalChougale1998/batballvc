@@ -254,11 +254,16 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import "../App.css";
 
-
+// ======================
+// import raje from "../assets/raje.jpg";
+// import logo from "../assets/logo.jpeg";
+// import rs from "../assets/rs.jpg";
+// ============================
 function Home() {
     const navigate = useNavigate();
 
     // ✅ Use images from PUBLIC folder (IMPORTANT)
+    // const images = [raje, logo, rs];
     const images = [
         "/raje.jpg",
         "/logo.jpeg",
