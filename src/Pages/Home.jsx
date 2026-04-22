@@ -265,7 +265,7 @@ function Home() {
     // ✅ Use images from PUBLIC folder (IMPORTANT)
     // const images = [raje, logo, rs];
     const images = [
-        "/raje.jpg",
+        "/csm.jpg",
         "/logo.jpeg",
         "/rs.jpg"
     ];
