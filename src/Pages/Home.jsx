@@ -260,9 +260,10 @@ function Home() {
 
     // ✅ Use images from PUBLIC folder (IMPORTANT)
     const images = [
-        "/sm.jpg",
+        // "/sm.jpg",
         "/logo.jpeg",
-        "/rs.jpg"
+        "/rs.jpg",
+        "/sm.jpg",
     ];
 
     const [index, setIndex] = useState(0);
