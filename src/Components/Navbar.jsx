@@ -22,8 +22,7 @@ function Navbar() {
                 zIndex: 1000
             }}
         >
-            {/* <h2 style={{ margin: 0 }}>BatBallVc 🏏</h2> */}
-            {/* <img src={logo} alt="Logo" style={{ height: "80px" }} /> */}
+
             <img src="/logo.jpeg" alt="logo" style={{ height: "80px" }} />
 
             <div style={{ display: "flex", gap: "20px" }}>
