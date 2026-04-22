@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import logo from "../Media/logo.jpeg";
+// import logo from "../Media/logo.jpeg";
 
 
 function Navbar() {
@@ -23,7 +23,8 @@ function Navbar() {
             }}
         >
             {/* <h2 style={{ margin: 0 }}>BatBallVc 🏏</h2> */}
-            <img src={logo} alt="Logo" style={{ height: "80px" }} />
+            {/* <img src={logo} alt="Logo" style={{ height: "80px" }} /> */}
+            <img src="/logo.jpeg" alt="logo" style={{ height: "80px" }} />
 
             <div style={{ display: "flex", gap: "20px" }}>
                 <Link to="/" style={{ color: "white", textDecoration: "none" }}>
