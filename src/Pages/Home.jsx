@@ -262,8 +262,7 @@ function Home() {
     const images = [
         "/raje.jpg",
         "/logo.jpeg",
-        "/rs.jpeg",
-        "/raje.jpg",
+        "/rs.jpg"
     ];
 
     const [index, setIndex] = useState(0);
