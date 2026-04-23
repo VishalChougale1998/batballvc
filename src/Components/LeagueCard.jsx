@@ -123,6 +123,7 @@
 // export default LeagueCard;
 
 // =====================================
+
 import { useNavigate } from "react-router-dom";
 import BASE_URL from "../api";
 import "./LeagueCard.css";
@@ -130,7 +131,7 @@ import "./LeagueCard.css";
 function LeagueCard({ league, showRegister }) {
     const navigate = useNavigate();
 
-    // ✅ SAFE IMAGE PATH (VITE FRIENDLY)
+    // ✅ VITE SAFE IMAGE PATH
     const fallbackImg = new URL("../assets/logo.jpeg", import.meta.url).href;
 
     const getImage = () => {
