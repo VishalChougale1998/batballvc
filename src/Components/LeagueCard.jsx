@@ -123,7 +123,6 @@
 // export default LeagueCard;
 
 // =====================================
-
 import { useNavigate } from "react-router-dom";
 import BASE_URL from "../api";
 import "./LeagueCard.css";
@@ -131,41 +130,37 @@ import "./LeagueCard.css";
 function LeagueCard({ league, showRegister }) {
     const navigate = useNavigate();
 
-    // 🔥 Safe image handler
+    // ✅ SAFE IMAGE PATH (VITE FRIENDLY)
+    const fallbackImg = new URL("../assets/logo.jpeg", import.meta.url).href;
+
     const getImage = () => {
         if (league?.banner) {
             return `${BASE_URL}/uploads/${league.banner}`;
         }
-        return "https://via.placeholder.com/600x200?text=League";
+        return fallbackImg;
     };
 
     return (
         <div className="league-card">
 
-            {/* IMAGE */}
             <img
                 src={getImage()}
                 alt={league?.name || "League"}
                 className="league-img"
                 onError={(e) => {
-                    e.target.src = "https://via.placeholder.com/600x200?text=League";
+                    e.target.src = fallbackImg;
                 }}
             />
 
             <div className="league-body">
 
-                {/* TITLE */}
                 <h4 className="league-title">
                     {league?.name || "League Name"}
                 </h4>
 
-                {/* DETAILS */}
                 <p>📍 <b>{league?.village || "N/A"}</b></p>
 
-                <p>
-                    💰 Fee: ₹
-                    <b>{league?.entryFee ?? 0}</b>
-                </p>
+                <p>💰 Fee: ₹<b>{league?.entryFee ?? 0}</b></p>
 
                 <p>
                     📅{" "}
@@ -174,7 +169,6 @@ function LeagueCard({ league, showRegister }) {
                         : "No Date"}
                 </p>
 
-                {/* ACTION BUTTON */}
                 <div className="league-actions">
                     {showRegister && (
                         <button
