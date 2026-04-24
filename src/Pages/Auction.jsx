@@ -375,7 +375,7 @@ function Auction() {
 
     /* ================= IMAGE FIX ================= */
     const getImg = (photo) => {
-        if (!photo) return "https://via.placeholder.com/150";
+        if (!photo) return "default.png";
         return `${BASE_URL}/uploads/${photo}`;
     };
 
@@ -538,7 +538,7 @@ function Auction() {
                         >
                             <img
                                 src={getImg(p.photo)}
-                                onError={(e) => e.target.src = "https://via.placeholder.com/150"}
+                                onError={(e) => e.target.src = "default.png"}
                                 alt=""
                             />
                             <div>{p.name}</div>
@@ -563,7 +563,7 @@ function Auction() {
 
                                         <img
                                             src={getImg(p.playerId?.photo)}
-                                            onError={(e) => e.target.src = "https://via.placeholder.com/150"}
+                                            onError={(e) => e.target.src = "default.png"}
                                             alt=""
                                         />
 
@@ -600,7 +600,7 @@ function Auction() {
                             <div className="card-left">
                                 <img
                                     src={getImg(currentPlayer.photo)}
-                                    onError={(e) => e.target.src = "https://via.placeholder.com/150"}
+                                    onError={(e) => e.target.src = "default.png"}
                                     alt=""
                                 />
                             </div>
