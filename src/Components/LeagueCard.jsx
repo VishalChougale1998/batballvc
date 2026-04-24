@@ -123,55 +123,56 @@
 // export default LeagueCard;
 
 // =====================================
-
 import { useNavigate } from "react-router-dom";
 import BASE_URL from "../api";
 import "./LeagueCard.css";
 
-function LeagueCard({ league, showRegister }) {
+function LeagueCard({ league = {}, showRegister }) {
     const navigate = useNavigate();
 
-    // ✅ VITE SAFE IMAGE PATH
-    const fallbackImg = new URL("../assets/logo.jpeg", import.meta.url).href;
-    // const fallbackImg = new URL("../logo.jpeg", import.meta.url).href;
-    const getImage = () => {
-        if (league?.banner) {
-            return `${BASE_URL}/uploads/${league.banner}`;
-        }
-        return fallbackImg;
-    };
+    // ✅ Safe image URL
+    const imageUrl = league.banner
+        ? `${BASE_URL}/uploads/${league.banner}`
+        : "/default.png";
+
+    // ✅ Safe date formatting
+    const formattedDate = league.lastDate
+        ? new Date(league.lastDate).toLocaleDateString()
+        : "No Date";
 
     return (
         <div className="league-card">
 
+            {/* ✅ IMAGE */}
             <img
-                src={getImage()}
-                alt={league?.name || "League"}
+                src={imageUrl}
+                alt={league.name || "League"}
                 className="league-img"
                 onError={(e) => {
-                    e.target.src = fallbackImg;
+                    e.target.onerror = null; // prevent infinite loop
+                    e.target.src = "/default.png";
                 }}
             />
 
             <div className="league-body">
 
+                {/* ✅ TITLE */}
                 <h4 className="league-title">
-                    {league?.name || "League Name"}
+                    {league.name || "League Name"}
                 </h4>
 
-                <p>📍 <b>{league?.village || "N/A"}</b></p>
-
-                <p>💰 Fee: ₹<b>{league?.entryFee ?? 0}</b></p>
+                {/* ✅ DETAILS */}
+                <p>📍 <b>{league.village || "Unknown"}</b></p>
 
                 <p>
-                    📅{" "}
-                    {league?.lastDate
-                        ? new Date(league.lastDate).toLocaleDateString()
-                        : "No Date"}
+                    💰 Fee: ₹<b>{league.entryFee ?? 0}</b>
                 </p>
 
+                <p>📅 {formattedDate}</p>
+
+                {/* ✅ BUTTON */}
                 <div className="league-actions">
-                    {showRegister && (
+                    {showRegister && league._id && (
                         <button
                             className="btn-register"
                             onClick={() => navigate(`/register/${league._id}`)}
