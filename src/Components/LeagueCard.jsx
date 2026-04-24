@@ -123,6 +123,8 @@
 // export default LeagueCard;
 
 // =====================================
+
+
 import { useNavigate } from "react-router-dom";
 import BASE_URL from "../api";
 import "./LeagueCard.css";
@@ -149,19 +151,19 @@ function LeagueCard({ league = {}, showRegister }) {
                 alt={league.name || "League"}
                 className="league-img"
                 onError={(e) => {
-                    e.target.onerror = null; // prevent infinite loop
+                    e.target.onerror = null;
                     e.target.src = "/default.jpg";
                 }}
             />
 
             <div className="league-body">
 
-                {/* ✅ TITLE */}
+                {/* TITLE */}
                 <h4 className="league-title">
                     {league.name || "League Name"}
                 </h4>
 
-                {/* ✅ DETAILS */}
+                {/* DETAILS */}
                 <p>📍 <b>{league.village || "Unknown"}</b></p>
 
                 <p>
@@ -170,7 +172,7 @@ function LeagueCard({ league = {}, showRegister }) {
 
                 <p>📅 {formattedDate}</p>
 
-                {/* ✅ BUTTON */}
+                {/* BUTTON */}
                 <div className="league-actions">
                     {showRegister && league._id && (
                         <button
