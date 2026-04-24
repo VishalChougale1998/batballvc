@@ -133,7 +133,7 @@ function LeagueCard({ league = {}, showRegister }) {
     // ✅ Safe image URL
     const imageUrl = league.banner
         ? `${BASE_URL}/uploads/${league.banner}`
-        : "/default.png";
+        : "/default.jpg";
 
     // ✅ Safe date formatting
     const formattedDate = league.lastDate
@@ -150,7 +150,7 @@ function LeagueCard({ league = {}, showRegister }) {
                 className="league-img"
                 onError={(e) => {
                     e.target.onerror = null; // prevent infinite loop
-                    e.target.src = "/default.png";
+                    e.target.src = "/default.jpg";
                 }}
             />
 

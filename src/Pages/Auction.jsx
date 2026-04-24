@@ -374,7 +374,7 @@ function Auction() {
 
     /* ================= IMAGE FIX ================= */
     const getImg = (photo) => {
-        if (!photo) return "/default.png";
+        if (!photo) return "/default.jpg";
         return `${BASE_URL}/uploads/${photo}`;
     };
 
@@ -532,7 +532,7 @@ function Auction() {
                     >
                         <img
                             src={getImg(p.photo)}
-                            onError={(e) => e.target.src = "/default.png"}
+                            onError={(e) => e.target.src = "/default.jpg"}
                             alt=""
                         />
                         <div>{p.name}</div>

@@ -203,7 +203,7 @@ function Admin() {
 
                         <div className="col photo">
                             <img
-                                src={p.photo || "default.png"}
+                                src={p.photo || "default.jpg"}
                                 alt="Player"
                                 className="player-photo"
                             />

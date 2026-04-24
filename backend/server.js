@@ -37,7 +37,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+/* 🔥 FIXED STATIC (IMPORTANT FOR RENDER) */
+app.use("/uploads", express.static("uploads"));
 
 /* ================= DB ================= */
 mongoose.connect(process.env.MONGO_URI)
@@ -188,7 +189,7 @@ app.get("/api/teams/with-players/:leagueId", async (req, res) => {
     }
 });
 
-/* ---------- DELETE TEAM (FIXED) ---------- */
+/* ---------- DELETE TEAM (FULL FIX) ---------- */
 app.delete("/api/teams/:id", async (req, res) => {
     try {
         const teamId = req.params.id;
@@ -198,7 +199,7 @@ app.delete("/api/teams/:id", async (req, res) => {
             return res.status(404).json({ success: false });
         }
 
-        // 🔥 reset players
+        // reset players
         await Player.updateMany(
             { teamId: teamId },
             {
@@ -208,7 +209,6 @@ app.delete("/api/teams/:id", async (req, res) => {
             }
         );
 
-        // 🔥 delete team
         await Team.findByIdAndDelete(teamId);
 
         res.json({ success: true });
@@ -248,7 +248,7 @@ app.post("/api/teams/add-player", async (req, res) => {
     }
 });
 
-/* ---------- REMOVE PLAYER FROM TEAM ---------- */
+/* ---------- REMOVE PLAYER (FIXED) ---------- */
 app.post("/api/teams/remove-player", async (req, res) => {
     try {
         const { playerId, teamId } = req.body;
@@ -256,20 +256,24 @@ app.post("/api/teams/remove-player", async (req, res) => {
         const team = await Team.findById(teamId);
         const player = await Player.findById(playerId);
 
-        if (!team || !player) return res.status(404).json({ msg: "Not found" });
+        if (!team || !player) {
+            return res.status(404).json({ msg: "Not found" });
+        }
 
-        // remove from team
+        const existing = team.players.find(
+            p => p.playerId.toString() === playerId
+        );
+
         team.players = team.players.filter(
             p => p.playerId.toString() !== playerId
         );
 
-        // refund purse
-        const removed = team.players.find(p => p.playerId == playerId);
-        if (removed) team.purse += removed.price;
+        if (existing) {
+            team.purse += existing.price;
+        }
 
         await team.save();
 
-        // reset player
         player.status = "unsold";
         player.teamId = null;
         player.price = 0;
@@ -277,7 +281,8 @@ app.post("/api/teams/remove-player", async (req, res) => {
 
         res.json({ success: true });
 
-    } catch {
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ msg: "Error removing player" });
     }
 });

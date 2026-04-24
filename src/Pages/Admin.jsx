@@ -200,7 +200,7 @@ function Admin() {
 
                         <div className="col">
                             <img
-                                src={p.photo ? `${BASE_URL}/uploads/${p.photo}` : "default.png"}
+                                src={p.photo ? `${BASE_URL}/uploads/${p.photo}` : "default.jpg"}
                                 style={{ width: "60px", height: "60px", borderRadius: "50%" }}
                             />
                         </div>
