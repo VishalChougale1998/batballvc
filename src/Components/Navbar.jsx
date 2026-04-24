@@ -44,9 +44,7 @@
 
 
 
-
 import { Link } from "react-router-dom";
-import logo from "../assets/logo.jpeg"; // ✅ correct import
 
 function Navbar() {
     return (
@@ -66,44 +64,20 @@ function Navbar() {
                 zIndex: 1000
             }}
         >
-
-            {/* ✅ LOGO */}
+            {/* ✅ LOGO FROM PUBLIC */}
             <img
-                src={logo}
+                src="/logo.jpeg"
                 alt="logo"
-                style={{
-                    height: "60px",
-                    objectFit: "contain"
-                }}
+                style={{ height: "60px", objectFit: "contain" }}
             />
 
-            {/* ✅ NAV LINKS */}
-            <div
-                style={{
-                    display: "flex",
-                    gap: "20px",
-                    alignItems: "center"
-                }}
-            >
-                <Link
-                    to="/"
-                    style={{
-                        color: "white",
-                        textDecoration: "none",
-                        fontWeight: "500"
-                    }}
-                >
+            {/* NAV LINKS */}
+            <div style={{ display: "flex", gap: "20px" }}>
+                <Link to="/" style={{ color: "white", textDecoration: "none" }}>
                     Home
                 </Link>
 
-                <Link
-                    to="/admin"
-                    style={{
-                        color: "white",
-                        textDecoration: "none",
-                        fontWeight: "500"
-                    }}
-                >
+                <Link to="/admin" style={{ color: "white", textDecoration: "none" }}>
                     Admin Login
                 </Link>
             </div>
