@@ -132,8 +132,8 @@ function LeagueCard({ league, showRegister }) {
     const navigate = useNavigate();
 
     // ✅ VITE SAFE IMAGE PATH
-    // const fallbackImg = new URL("../assets/logo.jpeg", import.meta.url).href;
-    const fallbackImg = new URL("../logo.jpeg", import.meta.url).href;
+    const fallbackImg = new URL("../assets/logo.jpeg", import.meta.url).href;
+    // const fallbackImg = new URL("../logo.jpeg", import.meta.url).href;
     const getImage = () => {
         if (league?.banner) {
             return `${BASE_URL}/uploads/${league.banner}`;

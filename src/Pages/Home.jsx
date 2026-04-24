@@ -295,7 +295,7 @@ function Home() {
             {/* CONTENT */}
             <div className="home-content">
 
-                <h1 className="home-title">BatBall VC</h1>
+                <h1 className="home-title">BatBall VC App</h1>
 
                 <p className="home-subtitle">
                     Join your local cricket tournaments
