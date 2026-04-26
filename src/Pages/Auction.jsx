@@ -825,10 +825,10 @@ function Auction() {
 
         const pdf = new jsPDF();
 
-        // 🔹 helper: convert image to base64
+        // 🔹 convert image → base64 (stable version)
         const getBase64 = async (url) => {
             try {
-                const res = await fetch(url);
+                const res = await fetch(url, { mode: "cors" });
                 const blob = await res.blob();
 
                 return await new Promise((resolve) => {
@@ -841,49 +841,70 @@ function Auction() {
             }
         };
 
-        // 🔹 HEADER
+        // 🎯 HEADER
+        pdf.setFillColor(15, 23, 42); // dark header
+        pdf.rect(0, 0, 210, 25, "F");
+
+        pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(18);
-        pdf.text(`${selectedTeam.name} - Players`, 105, 15, { align: "center" });
+        pdf.text(selectedTeam.name.toUpperCase(), 105, 15, { align: "center" });
+
+        pdf.setTextColor(0, 0, 0);
 
         let x = 10;
-        let y = 30;
+        let y = 35;
 
         const cardWidth = 90;
-        const cardHeight = 55;
+        const cardHeight = 60;
         const gap = 10;
 
         for (let p of selectedTeam.players || []) {
             const player = p.playerId;
             if (!player) continue;
 
-            // 🟦 CARD BORDER
-            pdf.setDrawColor(180);
-            pdf.rect(x, y, cardWidth, cardHeight, "S");
+            // 🟦 CARD BACKGROUND
+            pdf.setFillColor(248, 250, 252);
+            pdf.roundedRect(x, y, cardWidth, cardHeight, 4, 4, "F");
+
+            // 🟩 TOP STRIP (design)
+            pdf.setFillColor(34, 197, 94);
+            pdf.rect(x, y, cardWidth, 8, "F");
 
             // 🖼 IMAGE
             const img = await getBase64(getImg(player.photo));
+
             if (img) {
-                pdf.addImage(img, "JPEG", x + 3, y + 5, 22, 22);
+                const format = img.includes("png") ? "PNG" : "JPEG";
+                pdf.addImage(img, format, x + 3, y + 12, 22, 22);
+            } else {
+                // fallback box
+                pdf.setDrawColor(200);
+                pdf.rect(x + 3, y + 12, 22, 22);
+                pdf.setFontSize(7);
+                pdf.text("No Img", x + 6, y + 24);
             }
 
             // 🧑 NAME
             pdf.setFontSize(11);
             pdf.setFont(undefined, "bold");
-            pdf.text(player.name || "-", x + 28, y + 10);
+            pdf.text((player.name || "-").slice(0, 18), x + 28, y + 16);
 
-            // 📍 ROLE + VILLAGE
+            // 🎭 ROLE + VILLAGE
             pdf.setFontSize(9);
             pdf.setFont(undefined, "normal");
-            pdf.text(`Role: ${player.role || "-"}`, x + 28, y + 16);
-            pdf.text(`Village: ${player.village || "-"}`, x + 28, y + 22);
+            pdf.text(`Role: ${player.role || "-"}`, x + 28, y + 22);
+            pdf.text(`Village: ${player.village || "-"}`, x + 28, y + 28);
 
             // 📏 SIZES
-            pdf.text(`Shirt: ${player.tshirtSize || "-"}`, x + 5, y + 35);
-            pdf.text(`Pant: ${player.pantSize || "-"}`, x + 45, y + 35);
+            pdf.text(`Shirt: ${player.tshirtSize || "-"}`, x + 5, y + 45);
+            pdf.text(`Pant: ${player.pantSize || "-"}`, x + 45, y + 45);
 
-            // 💰 BID
+            // 💰 BID (highlight)
             pdf.setFont(undefined, "bold");
-            pdf.text(`₹ ${p.price}`, x + 5, y + 45);
+            pdf.setTextColor(22, 163, 74);
+            pdf.text(`₹ ${p.price}`, x + 5, y + 55);
+
+            pdf.setTextColor(0, 0, 0);
 
             // ➡️ NEXT POSITION
             x += cardWidth + gap;
@@ -901,7 +922,7 @@ function Auction() {
             }
         }
 
-        pdf.save(`${selectedTeam.name}_cards.pdf`);
+        pdf.save(`${selectedTeam.name}_premium.pdf`);
     };
 
     const downloadExcel = () => {
@@ -1038,5 +1059,6 @@ function Auction() {
         </div>
     );
 }
+console.log(getImg(player.photo));
 
 export default Auction;
