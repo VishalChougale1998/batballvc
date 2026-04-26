@@ -165,7 +165,7 @@ function Auction() {
 
         // ===== HEADER =====
         try {
-            const logo = await getBase64("/logo.png");
+            const logo = await getBase64("BatballVc");
             pdf.addImage(logo, "PNG", 10, 5, 18, 18);
         } catch { }
 
