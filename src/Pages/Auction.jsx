@@ -699,14 +699,82 @@ function Auction() {
 
     /* ================= EXPORT PDF ================= */
     const downloadPDF = async () => {
-        const element = document.querySelector(".team-grid");
-
-        const canvas = await html2canvas(element);
-        const imgData = canvas.toDataURL("image/png");
-
         const pdf = new jsPDF();
-        pdf.addImage(imgData, "PNG", 10, 10, 180, 0);
-        pdf.save("team.pdf");
+
+        // ================= LOGO =================
+        const logoUrl = "/logo.png"; // put logo in public folder
+        const getBase64 = async (url) => {
+            const res = await fetch(url);
+            const blob = await res.blob();
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+            });
+        };
+
+        let logoBase64 = "";
+        try {
+            logoBase64 = await getBase64(logoUrl);
+            pdf.addImage(logoBase64, "PNG", 10, 5, 20, 20);
+        } catch { }
+
+        // ================= HEADER =================
+        pdf.setFontSize(16);
+        pdf.text(selectedTeam.name.toUpperCase(), 105, 15, { align: "center" });
+
+        pdf.setFontSize(10);
+        pdf.text("Team Players List", 105, 22, { align: "center" });
+
+        // ================= CARD SETTINGS =================
+        let x = 10;
+        let y = 30;
+
+        const cardWidth = 90;
+        const cardHeight = 60;
+        const gap = 10;
+
+        for (let p of selectedTeam.players) {
+            const player = p.playerId;
+
+            // DRAW CARD
+            pdf.setDrawColor(0);
+            pdf.rect(x, y, cardWidth, cardHeight);
+
+            // IMAGE
+            try {
+                const imgBase64 = await getBase64(getImg(player.photo));
+                pdf.addImage(imgBase64, "JPEG", x + 3, y + 3, 25, 25);
+            } catch { }
+
+            // TEXT
+            pdf.setFontSize(10);
+
+            pdf.text(`Name: ${player.name}`, x + 30, y + 10);
+            pdf.text(`Role: ${player.role}`, x + 30, y + 16);
+            pdf.text(`Village: ${player.village}`, x + 30, y + 22);
+
+            pdf.text(`Bid: ₹${p.price}`, x + 5, y + 35);
+            pdf.text(`Shirt: ${player.tshirtSize}`, x + 5, y + 42);
+            pdf.text(`Pant: ${player.pantSize}`, x + 5, y + 49);
+
+            // NEXT POSITION
+            x += cardWidth + gap;
+
+            if (x + cardWidth > 200) {
+                x = 10;
+                y += cardHeight + gap;
+            }
+
+            // NEW PAGE
+            if (y + cardHeight > 280) {
+                pdf.addPage();
+                x = 10;
+                y = 20;
+            }
+        }
+
+        pdf.save(`${selectedTeam.name}.pdf`);
     };
 
     /* ================= EXPORT EXCEL ================= */
