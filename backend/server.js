@@ -291,3 +291,17 @@ app.use("/api/payment", paymentRoutes);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
+
+
+// ==========refresh===========
+
+import path from "path";
+
+const frontendPath = path.join(__dirname, "../frontend/dist");
+
+app.use(express.static(frontendPath));
+
+// ⚡ THIS IS THE MAIN FIX
+app.get("*", (req, res) => {
+    res.sendFile(path.join(frontendPath, "index.html"));
+});
