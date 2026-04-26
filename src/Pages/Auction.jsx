@@ -26,7 +26,7 @@ function Auction() {
         loadData();
     }, [leagueId]);
 
-    /* ================= SAFE LOAD ================= */
+    /* ================= LOAD ================= */
     const loadData = async () => {
         try {
             setLoading(true);
@@ -41,7 +41,7 @@ function Auction() {
             setTeams(Array.isArray(teamsData) ? teamsData : []);
 
         } catch (err) {
-            console.error("LOAD ERROR:", err);
+            console.error(err);
             setPlayers([]);
             setTeams([]);
         } finally {
@@ -49,12 +49,15 @@ function Auction() {
         }
     };
 
-    /* ================= IMAGE ================= */
+    /* ================= IMAGE FIX ================= */
     const getImg = (photo) => {
         if (!photo) return "/default.jpg";
+
         if (photo.startsWith("http")) return photo;
-        if (photo.startsWith("uploads/")) return `${BASE_URL}/${photo}`;
-        return `${BASE_URL}/uploads/${photo}`;
+
+        const clean = photo.replace(/^\/?uploads\//, "");
+
+        return `${BASE_URL}/uploads/${clean}`;
     };
 
     /* ================= TEAM ================= */
@@ -109,13 +112,12 @@ function Auction() {
         loadData();
     };
 
-    /* ================= PDF (PREMIUM CARD) ================= */
+    /* ================= PDF ================= */
     const downloadPDF = async () => {
         if (!selectedTeam) return alert("Select team first");
 
         const pdf = new jsPDF();
 
-        // 🔹 convert image → base64
         const getBase64 = async (url) => {
             try {
                 const res = await fetch(url);
@@ -131,77 +133,52 @@ function Auction() {
             }
         };
 
-        // 🔹 clean text (fix weird symbols issue)
-        const clean = (val) => {
-            if (!val) return "-";
-            return String(val).replace(/[^\w\s₹.-]/g, "");
-        };
-
-        // 🔹 format price properly
         const formatPrice = (val) => {
             const num = Number(val);
-            if (isNaN(num)) return "₹ 0";
-            return `₹ ${num.toLocaleString("en-IN")}`;
+            if (isNaN(num)) return "Rs 0";
+            return `Rs ${num.toLocaleString("en-IN")}`;
         };
 
-        // 🔹 HEADER
         pdf.setFontSize(18);
-        pdf.text(clean(selectedTeam.name), 105, 15, { align: "center" });
+        pdf.text(selectedTeam.name, 105, 15, { align: "center" });
 
-        let x = 10;
-        let y = 30;
-
-        const cardWidth = 90;
-        const cardHeight = 55;
-        const gap = 10;
+        let x = 10, y = 30;
 
         for (let p of selectedTeam.players || []) {
             const player = p.playerId;
             if (!player) continue;
 
-            // 🟦 CARD
-            pdf.rect(x, y, cardWidth, cardHeight);
+            pdf.rect(x, y, 90, 55);
 
-            // 🖼 IMAGE
             const img = await getBase64(getImg(player.photo));
             if (img) {
                 const format = img.includes("png") ? "PNG" : "JPEG";
                 pdf.addImage(img, format, x + 3, y + 5, 20, 20);
             }
 
-            // 🧑 TEXT
-            pdf.setFontSize(10);
-            pdf.setFont(undefined, "bold");
-            pdf.text(clean(player.name), x + 28, y + 10);
+            pdf.text(player.name || "-", x + 28, y + 10);
+            pdf.text(player.role || "-", x + 28, y + 16);
+            pdf.text(player.village || "-", x + 28, y + 22);
 
-            pdf.setFont(undefined, "normal");
-            pdf.text(clean(player.role), x + 28, y + 16);
-            pdf.text(clean(player.village), x + 28, y + 22);
+            pdf.text(`Shirt: ${player.tshirtSize || "-"}`, x + 5, y + 35);
+            pdf.text(`Pant: ${player.pantSize || "-"}`, x + 45, y + 35);
 
-            pdf.text(`Shirt: ${clean(player.tshirtSize)}`, x + 5, y + 35);
-            pdf.text(`Pant: ${clean(player.pantSize)}`, x + 45, y + 35);
-
-            // 💰 PRICE (FIXED)
-            pdf.setFont(undefined, "bold");
             pdf.text(formatPrice(p.price), x + 5, y + 45);
 
-            // ➡️ NEXT POSITION
-            x += cardWidth + gap;
-
-            if (x + cardWidth > 200) {
+            x += 100;
+            if (x > 180) {
                 x = 10;
-                y += cardHeight + gap;
+                y += 60;
             }
 
-            // ➕ NEW PAGE (IMPORTANT FIX)
-            if (y + cardHeight > 280) {
+            if (y > 260) {
                 pdf.addPage();
                 x = 10;
                 y = 20;
             }
         }
 
-        pdf.save(`${clean(selectedTeam.name)}.pdf`);
+        pdf.save(`${selectedTeam.name}.pdf`);
     };
 
     /* ================= EXCEL ================= */
@@ -222,7 +199,6 @@ function Auction() {
         XLSX.writeFile(wb, `${selectedTeam.name}.xlsx`);
     };
 
-    /* ================= UI ================= */
     return (
         <div className="auction-page">
 
@@ -240,7 +216,7 @@ function Auction() {
                             setSelectedTeam(t);
                             setCurrentPlayer(null);
                         }}>
-                        {t.name} ₹{t.purse}
+                        {t.name} Rs {t.purse}
                         <span onClick={(e) => {
                             e.stopPropagation();
                             deleteTeam(t._id);
@@ -253,19 +229,23 @@ function Auction() {
 
                 <div className="left-panel">
                     <h3>Unsold Players</h3>
+
                     {loading && <p>Loading...</p>}
 
-                    {Array.isArray(players) &&
-                        players.filter(p => p.status !== "sold").map(p => (
-                            <div key={p._id} className="player-row"
-                                onClick={() => {
-                                    setCurrentPlayer(p);
-                                    setSelectedTeam(null);
-                                }}>
-                                <img src={getImg(p.photo)} alt="" />
-                                <div>{p.name}</div>
-                            </div>
-                        ))}
+                    {players.filter(p => p.status !== "sold").map(p => (
+                        <div key={p._id} className="player-row"
+                            onClick={() => {
+                                setCurrentPlayer(p);
+                                setSelectedTeam(null);
+                            }}>
+                            <img
+                                src={getImg(p.photo)}
+                                onError={(e) => (e.target.src = "/default.jpg")}
+                                alt=""
+                            />
+                            <div>{p.name}</div>
+                        </div>
+                    ))}
                 </div>
 
                 <div className="right-panel">
@@ -278,10 +258,20 @@ function Auction() {
                             <div className="team-grid">
                                 {selectedTeam.players?.map(p => (
                                     <div className="team-card" key={p._id}>
-                                        <img src={getImg(p.playerId?.photo)} alt="" />
+                                        <img
+                                            src={getImg(p.playerId?.photo)}
+                                            onError={(e) => (e.target.src = "/default.jpg")}
+                                            alt=""
+                                        />
                                         <h3>{p.playerId?.name || "-"}</h3>
                                         <p>{p.playerId?.role || "-"}</p>
-                                        <p>₹{p.price}</p>
+                                        <p>Rs {Number(p.price || 0).toLocaleString("en-IN")}</p>
+
+                                        <button onClick={() =>
+                                            unsoldPlayer(p.playerId?._id, selectedTeam?._id)
+                                        }>
+                                            Remove
+                                        </button>
                                     </div>
                                 ))}
                             </div>
@@ -291,22 +281,20 @@ function Auction() {
                     {!selectedTeam && currentPlayer && (
                         <div className="auction-card">
 
-                            {/* LEFT - IMAGE */}
                             <div className="card-left">
                                 <img
                                     src={getImg(currentPlayer.photo)}
+                                    onError={(e) => (e.target.src = "/default.jpg")}
                                     alt=""
-                                    onError={(e) => e.target.src = "/default.jpg"}
                                 />
                             </div>
 
-                            {/* RIGHT - DETAILS */}
                             <div className="card-right">
 
                                 <h2>{currentPlayer.name}</h2>
                                 <p>{currentPlayer.role}</p>
 
-                                <h1>₹{price}</h1>
+                                <h1>Rs {price}</h1>
 
                                 <div className="bid-buttons">
                                     <button onClick={() => setPrice(price + 100)}>+100</button>
