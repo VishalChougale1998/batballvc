@@ -546,11 +546,14 @@
 // export default Auction;
 
 // ============================================
-
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import BASE_URL from "../api";
 import "./Auction.css";
+
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import * as XLSX from "xlsx";
 
 function Auction() {
     const { leagueId } = useParams();
@@ -599,6 +602,10 @@ function Auction() {
         if (!photo) return "/default.jpg";
 
         if (photo.startsWith("http")) return photo;
+
+        if (photo.startsWith("uploads/")) {
+            return `${BASE_URL}/${photo}`;
+        }
 
         return `${BASE_URL}/uploads/${photo}`;
     };
@@ -690,6 +697,32 @@ function Auction() {
         }
     };
 
+    /* ================= EXPORT PDF ================= */
+    const downloadPDF = async () => {
+        const element = document.querySelector(".team-grid");
+
+        const canvas = await html2canvas(element);
+        const imgData = canvas.toDataURL("image/png");
+
+        const pdf = new jsPDF();
+        pdf.addImage(imgData, "PNG", 10, 10, 180, 0);
+        pdf.save("team.pdf");
+    };
+
+    /* ================= EXPORT EXCEL ================= */
+    const downloadExcel = () => {
+        const data = selectedTeam.players.map(p => ({
+            Name: p.playerId.name,
+            Price: p.price
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(wb, ws, "Team");
+        XLSX.writeFile(wb, "team.xlsx");
+    };
+
     return (
         <div className="auction-page">
 
@@ -770,6 +803,13 @@ function Auction() {
                     {/* TEAM VIEW */}
                     {selectedTeam && (
                         <div>
+
+                            {/* EXPORT BUTTONS */}
+                            <div style={{ marginBottom: "15px" }}>
+                                <button onClick={downloadPDF}>Export PDF</button>
+                                <button onClick={downloadExcel}>Export Excel</button>
+                            </div>
+
                             <h2>{selectedTeam.name} Players</h2>
 
                             <div className="team-grid">
@@ -786,7 +826,6 @@ function Auction() {
                                         <p>₹{p.price}</p>
 
                                         <button
-                                            className="unsold-btn"
                                             onClick={() =>
                                                 unsoldPlayer(
                                                     p.playerId?._id,
@@ -808,7 +847,7 @@ function Auction() {
                         <div className="auction-card">
 
                             <div className="card-left">
-                                <img src={getImg(currentPlayer.photo)} />
+                                <img src={getImg(currentPlayer.photo)} alt="" />
                             </div>
 
                             <div className="card-right">
