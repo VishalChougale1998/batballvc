@@ -713,13 +713,377 @@
 
 
 
+// import { useParams } from "react-router-dom";
+// import { useState, useEffect } from "react";
+// import BASE_URL from "../api";
+// import "./Auction.css";
+
+// import jsPDF from "jspdf";
+// import autoTable from "jspdf-autotable";
+// import * as XLSX from "xlsx";
+
+// function Auction() {
+//     const { leagueId } = useParams();
+
+//     const [players, setPlayers] = useState([]);
+//     const [teams, setTeams] = useState([]);
+//     const [selectedTeam, setSelectedTeam] = useState(null);
+//     const [currentPlayer, setCurrentPlayer] = useState(null);
+
+//     const [teamName, setTeamName] = useState("");
+//     const [teamPurse, setTeamPurse] = useState(100000);
+
+//     const [teamId, setTeamId] = useState("");
+//     const [price, setPrice] = useState(0);
+
+//     const [loading, setLoading] = useState(false);
+
+//     useEffect(() => {
+//         loadData();
+//     }, [leagueId]);
+
+//     const loadData = async () => {
+//         try {
+//             setLoading(true);
+
+//             const p = await fetch(`${BASE_URL}/api/players/${leagueId}`);
+//             const t = await fetch(`${BASE_URL}/api/teams/with-players/${leagueId}`);
+
+//             const playersData = await p.json();
+//             const teamsData = await t.json();
+
+//             setPlayers(Array.isArray(playersData) ? playersData : []);
+//             setTeams(Array.isArray(teamsData) ? teamsData : []);
+
+//         } catch (err) {
+//             console.error(err);
+//         } finally {
+//             setLoading(false);
+//         }
+//     };
+
+//     const getImg = (photo) => {
+//         if (!photo) return "/default.jpg";
+//         if (photo.startsWith("http")) return photo;
+//         if (photo.startsWith("uploads/")) return `${BASE_URL}/${photo}`;
+//         return `${BASE_URL}/uploads/${photo}`;
+//     };
+
+//     const createTeam = async () => {
+//         if (!teamName) return alert("Enter team name");
+
+//         await fetch(`${BASE_URL}/api/teams`, {
+//             method: "POST",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({ name: teamName, purse: teamPurse, leagueId })
+//         });
+
+//         setTeamName("");
+//         loadData();
+//     };
+
+//     const deleteTeam = async (id) => {
+//         if (!window.confirm("Delete this team?")) return;
+
+//         await fetch(`${BASE_URL}/api/teams/${id}`, { method: "DELETE" });
+//         loadData();
+
+//         if (selectedTeam?._id === id) setSelectedTeam(null);
+//     };
+
+//     const sellPlayer = async () => {
+//         if (!teamId) return alert("Select team");
+
+//         await fetch(`${BASE_URL}/api/teams/add-player`, {
+//             method: "POST",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({
+//                 teamId,
+//                 playerId: currentPlayer._id,
+//                 price
+//             })
+//         });
+
+//         setCurrentPlayer(null);
+//         setPrice(0);
+//         loadData();
+//     };
+
+//     const unsoldPlayer = async (playerId, teamId) => {
+//         await fetch(`${BASE_URL}/api/teams/remove-player`, {
+//             method: "POST",
+//             headers: { "Content-Type": "application/json" },
+//             body: JSON.stringify({ playerId, teamId })
+//         });
+
+//         loadData();
+//     };
+
+//     /* ✅ FIXED PDF */
+//     const downloadPDF = async () => {
+//         if (!selectedTeam) return alert("Select team first");
+
+//         const pdf = new jsPDF();
+
+//         // 🔹 convert image → base64 (stable version)
+//         const getBase64 = async (url) => {
+//             try {
+//                 const res = await fetch(url, { mode: "cors" });
+//                 const blob = await res.blob();
+
+//                 return await new Promise((resolve) => {
+//                     const reader = new FileReader();
+//                     reader.onloadend = () => resolve(reader.result);
+//                     reader.readAsDataURL(blob);
+//                 });
+//             } catch {
+//                 return null;
+//             }
+//         };
+
+//         // 🎯 HEADER
+//         pdf.setFillColor(15, 23, 42); // dark header
+//         pdf.rect(0, 0, 210, 25, "F");
+
+//         pdf.setTextColor(255, 255, 255);
+//         pdf.setFontSize(18);
+//         pdf.text(selectedTeam.name.toUpperCase(), 105, 15, { align: "center" });
+
+//         pdf.setTextColor(0, 0, 0);
+
+//         let x = 10;
+//         let y = 35;
+
+//         const cardWidth = 90;
+//         const cardHeight = 60;
+//         const gap = 10;
+
+//         for (let p of selectedTeam.players || []) {
+//             const player = p.playerId;
+//             if (!player) continue;
+
+//             // 🟦 CARD BACKGROUND
+//             pdf.setFillColor(248, 250, 252);
+//             pdf.roundedRect(x, y, cardWidth, cardHeight, 4, 4, "F");
+
+//             // 🟩 TOP STRIP (design)
+//             pdf.setFillColor(34, 197, 94);
+//             pdf.rect(x, y, cardWidth, 8, "F");
+
+//             // 🖼 IMAGE
+//             const img = await getBase64(getImg(player.photo));
+
+//             if (img) {
+//                 const format = img.includes("png") ? "PNG" : "JPEG";
+//                 pdf.addImage(img, format, x + 3, y + 12, 22, 22);
+//             } else {
+//                 // fallback box
+//                 pdf.setDrawColor(200);
+//                 pdf.rect(x + 3, y + 12, 22, 22);
+//                 pdf.setFontSize(7);
+//                 pdf.text("No Img", x + 6, y + 24);
+//             }
+
+//             // 🧑 NAME
+//             pdf.setFontSize(11);
+//             pdf.setFont(undefined, "bold");
+//             pdf.text((player.name || "-").slice(0, 18), x + 28, y + 16);
+
+//             // 🎭 ROLE + VILLAGE
+//             pdf.setFontSize(9);
+//             pdf.setFont(undefined, "normal");
+//             pdf.text(`Role: ${player.role || "-"}`, x + 28, y + 22);
+//             pdf.text(`Village: ${player.village || "-"}`, x + 28, y + 28);
+
+//             // 📏 SIZES
+//             pdf.text(`Shirt: ${player.tshirtSize || "-"}`, x + 5, y + 45);
+//             pdf.text(`Pant: ${player.pantSize || "-"}`, x + 45, y + 45);
+
+//             // 💰 BID (highlight)
+//             pdf.setFont(undefined, "bold");
+//             pdf.setTextColor(22, 163, 74);
+//             pdf.text(`₹ ${p.price}`, x + 5, y + 55);
+
+//             pdf.setTextColor(0, 0, 0);
+
+//             // ➡️ NEXT POSITION
+//             x += cardWidth + gap;
+
+//             if (x + cardWidth > 200) {
+//                 x = 10;
+//                 y += cardHeight + gap;
+//             }
+
+//             // ➕ NEW PAGE
+//             if (y + cardHeight > 280) {
+//                 pdf.addPage();
+//                 x = 10;
+//                 y = 20;
+//             }
+//         }
+
+//         pdf.save(`${selectedTeam.name}_premium.pdf`);
+//     };
+
+//     const downloadExcel = () => {
+//         if (!selectedTeam) return alert("Select team first");
+
+//         const data = (selectedTeam.players || []).map(p => ({
+//             Name: p.playerId?.name,
+//             Role: p.playerId?.role,
+//             Village: p.playerId?.village,
+//             Price: p.price
+//         }));
+
+//         const ws = XLSX.utils.json_to_sheet(data);
+//         const wb = XLSX.utils.book_new();
+
+//         XLSX.utils.book_append_sheet(wb, ws, "Team");
+//         XLSX.writeFile(wb, `${selectedTeam.name}.xlsx`);
+//     };
+//     // =======================
+//     const getImg = (photo) => {
+//         if (!photo) return "/default.jpg";
+
+//         if (photo.startsWith("http")) return photo;
+
+//         if (photo.startsWith("uploads/")) {
+//             return `${BASE_URL}/${photo}`;
+//         }
+
+//         return `${BASE_URL}/uploads/${photo}`;
+//     };
+//     // ====================================
+//     return (
+//         <div className="auction-page">
+
+//             {/* CREATE TEAM */}
+//             <div className="top-bar">
+//                 <input
+//                     placeholder="Team Name"
+//                     value={teamName}
+//                     onChange={(e) => setTeamName(e.target.value)}
+//                 />
+//                 <input
+//                     type="number"
+//                     value={teamPurse}
+//                     onChange={(e) => setTeamPurse(e.target.value)}
+//                 />
+//                 <button onClick={createTeam}>Create</button>
+//             </div>
+
+//             {/* TEAM BAR */}
+//             <div className="team-bar">
+//                 {teams.map(t => (
+//                     <div
+//                         key={t._id}
+//                         className={`team-pill ${selectedTeam?._id === t._id ? "active" : ""}`}
+//                         onClick={() => {
+//                             setSelectedTeam(t);
+//                             setCurrentPlayer(null);
+//                         }}
+//                     >
+//                         {t.name} ₹{t.purse}
+//                         <span onClick={(e) => {
+//                             e.stopPropagation();
+//                             deleteTeam(t._id);
+//                         }}>❌</span>
+//                     </div>
+//                 ))}
+//             </div>
+
+//             <div className="main-layout">
+
+//                 {/* LEFT */}
+//                 <div className="left-panel">
+//                     <h3>Unsold Players</h3>
+
+//                     {loading && <p>Loading...</p>}
+
+//                     {players.filter(p => p.status !== "sold").map(p => (
+//                         <div key={p._id} className="player-row"
+//                             onClick={() => {
+//                                 setCurrentPlayer(p);
+//                                 setSelectedTeam(null);
+//                             }}>
+//                             <img src={getImg(p.photo)} alt="" />
+//                             <div>{p.name}</div>
+//                         </div>
+//                     ))}
+//                 </div>
+
+//                 {/* RIGHT */}
+//                 <div className="right-panel">
+
+//                     {selectedTeam && (
+//                         <>
+//                             <div className="export-buttons">
+//                                 <button onClick={downloadPDF}>PDF</button>
+//                                 <button onClick={downloadExcel}>Excel</button>
+//                             </div>
+
+//                             <h2>{selectedTeam.name} Players</h2>
+
+//                             <div className="team-grid">
+//                                 {selectedTeam.players?.map(p => (
+//                                     <div className="team-card" key={p._id}>
+//                                         <img src={getImg(p.playerId?.photo)} alt="" />
+//                                         <h3>{p.playerId?.name}</h3>
+//                                         <p>{p.playerId?.role}</p>
+//                                         <p>₹{p.price}</p>
+
+//                                         <button onClick={() =>
+//                                             unsoldPlayer(p.playerId?._id, selectedTeam?._id)
+//                                         }>
+//                                             Remove
+//                                         </button>
+//                                     </div>
+//                                 ))}
+//                             </div>
+//                         </>
+//                     )}
+
+//                     {!selectedTeam && currentPlayer && (
+//                         <div className="auction-card">
+//                             <img src={getImg(currentPlayer.photo)} alt="" />
+
+//                             <h2>{currentPlayer.name}</h2>
+//                             <p>{currentPlayer.role}</p>
+
+//                             <h1>₹{price}</h1>
+
+//                             <button onClick={() => setPrice(price + 100)}>+100</button>
+//                             <button onClick={() => setPrice(price + 500)}>+500</button>
+
+//                             <select onChange={(e) => setTeamId(e.target.value)}>
+//                                 <option>Select Team</option>
+//                                 {teams.map(t => (
+//                                     <option key={t._id} value={t._id}>{t.name}</option>
+//                                 ))}
+//                             </select>
+
+//                             <button onClick={sellPlayer}>SELL PLAYER</button>
+//                         </div>
+//                     )}
+
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// }
+// console.log(getImg(player.photo));
+
+// export default Auction;
+
+
+// =============================================================
+
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import BASE_URL from "../api";
 import "./Auction.css";
 
 import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 
 function Auction() {
@@ -742,6 +1106,7 @@ function Auction() {
         loadData();
     }, [leagueId]);
 
+    /* ================= SAFE LOAD ================= */
     const loadData = async () => {
         try {
             setLoading(true);
@@ -756,12 +1121,15 @@ function Auction() {
             setTeams(Array.isArray(teamsData) ? teamsData : []);
 
         } catch (err) {
-            console.error(err);
+            console.error("LOAD ERROR:", err);
+            setPlayers([]);
+            setTeams([]);
         } finally {
             setLoading(false);
         }
     };
 
+    /* ================= IMAGE ================= */
     const getImg = (photo) => {
         if (!photo) return "/default.jpg";
         if (photo.startsWith("http")) return photo;
@@ -769,6 +1137,7 @@ function Auction() {
         return `${BASE_URL}/uploads/${photo}`;
     };
 
+    /* ================= TEAM ================= */
     const createTeam = async () => {
         if (!teamName) return alert("Enter team name");
 
@@ -791,8 +1160,9 @@ function Auction() {
         if (selectedTeam?._id === id) setSelectedTeam(null);
     };
 
+    /* ================= PLAYER ================= */
     const sellPlayer = async () => {
-        if (!teamId) return alert("Select team");
+        if (!teamId || !currentPlayer) return alert("Select team & player");
 
         await fetch(`${BASE_URL}/api/teams/add-player`, {
             method: "POST",
@@ -819,16 +1189,15 @@ function Auction() {
         loadData();
     };
 
-    /* ✅ FIXED PDF */
+    /* ================= PDF (PREMIUM CARD) ================= */
     const downloadPDF = async () => {
         if (!selectedTeam) return alert("Select team first");
 
         const pdf = new jsPDF();
 
-        // 🔹 convert image → base64 (stable version)
         const getBase64 = async (url) => {
             try {
-                const res = await fetch(url, { mode: "cors" });
+                const res = await fetch(url);
                 const blob = await res.blob();
 
                 return await new Promise((resolve) => {
@@ -841,90 +1210,39 @@ function Auction() {
             }
         };
 
-        // 🎯 HEADER
-        pdf.setFillColor(15, 23, 42); // dark header
-        pdf.rect(0, 0, 210, 25, "F");
-
-        pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(18);
-        pdf.text(selectedTeam.name.toUpperCase(), 105, 15, { align: "center" });
+        pdf.text(selectedTeam.name, 105, 15, { align: "center" });
 
-        pdf.setTextColor(0, 0, 0);
-
-        let x = 10;
-        let y = 35;
-
-        const cardWidth = 90;
-        const cardHeight = 60;
-        const gap = 10;
+        let x = 10, y = 30;
 
         for (let p of selectedTeam.players || []) {
             const player = p.playerId;
             if (!player) continue;
 
-            // 🟦 CARD BACKGROUND
-            pdf.setFillColor(248, 250, 252);
-            pdf.roundedRect(x, y, cardWidth, cardHeight, 4, 4, "F");
+            pdf.rect(x, y, 90, 55);
 
-            // 🟩 TOP STRIP (design)
-            pdf.setFillColor(34, 197, 94);
-            pdf.rect(x, y, cardWidth, 8, "F");
-
-            // 🖼 IMAGE
             const img = await getBase64(getImg(player.photo));
+            if (img) pdf.addImage(img, "JPEG", x + 3, y + 5, 20, 20);
 
-            if (img) {
-                const format = img.includes("png") ? "PNG" : "JPEG";
-                pdf.addImage(img, format, x + 3, y + 12, 22, 22);
-            } else {
-                // fallback box
-                pdf.setDrawColor(200);
-                pdf.rect(x + 3, y + 12, 22, 22);
-                pdf.setFontSize(7);
-                pdf.text("No Img", x + 6, y + 24);
-            }
+            pdf.text(player.name || "-", x + 28, y + 10);
+            pdf.text(player.role || "-", x + 28, y + 16);
+            pdf.text(player.village || "-", x + 28, y + 22);
 
-            // 🧑 NAME
-            pdf.setFontSize(11);
-            pdf.setFont(undefined, "bold");
-            pdf.text((player.name || "-").slice(0, 18), x + 28, y + 16);
+            pdf.text(`Shirt: ${player.tshirtSize || "-"}`, x + 5, y + 35);
+            pdf.text(`Pant: ${player.pantSize || "-"}`, x + 45, y + 35);
+            pdf.text(`₹ ${p.price}`, x + 5, y + 45);
 
-            // 🎭 ROLE + VILLAGE
-            pdf.setFontSize(9);
-            pdf.setFont(undefined, "normal");
-            pdf.text(`Role: ${player.role || "-"}`, x + 28, y + 22);
-            pdf.text(`Village: ${player.village || "-"}`, x + 28, y + 28);
-
-            // 📏 SIZES
-            pdf.text(`Shirt: ${player.tshirtSize || "-"}`, x + 5, y + 45);
-            pdf.text(`Pant: ${player.pantSize || "-"}`, x + 45, y + 45);
-
-            // 💰 BID (highlight)
-            pdf.setFont(undefined, "bold");
-            pdf.setTextColor(22, 163, 74);
-            pdf.text(`₹ ${p.price}`, x + 5, y + 55);
-
-            pdf.setTextColor(0, 0, 0);
-
-            // ➡️ NEXT POSITION
-            x += cardWidth + gap;
-
-            if (x + cardWidth > 200) {
+            x += 100;
+            if (x > 180) {
                 x = 10;
-                y += cardHeight + gap;
-            }
-
-            // ➕ NEW PAGE
-            if (y + cardHeight > 280) {
-                pdf.addPage();
-                x = 10;
-                y = 20;
+                y += 60;
             }
         }
 
-        pdf.save(`${selectedTeam.name}_premium.pdf`);
+        pdf.save(`${selectedTeam.name}.pdf`);
     };
 
+    /* ================= EXCEL ================= */
     const downloadExcel = () => {
         if (!selectedTeam) return alert("Select team first");
 
@@ -942,35 +1260,24 @@ function Auction() {
         XLSX.writeFile(wb, `${selectedTeam.name}.xlsx`);
     };
 
+    /* ================= UI ================= */
     return (
         <div className="auction-page">
 
-            {/* CREATE TEAM */}
             <div className="top-bar">
-                <input
-                    placeholder="Team Name"
-                    value={teamName}
-                    onChange={(e) => setTeamName(e.target.value)}
-                />
-                <input
-                    type="number"
-                    value={teamPurse}
-                    onChange={(e) => setTeamPurse(e.target.value)}
-                />
+                <input value={teamName} onChange={(e) => setTeamName(e.target.value)} />
+                <input type="number" value={teamPurse} onChange={(e) => setTeamPurse(e.target.value)} />
                 <button onClick={createTeam}>Create</button>
             </div>
 
-            {/* TEAM BAR */}
             <div className="team-bar">
                 {teams.map(t => (
-                    <div
-                        key={t._id}
+                    <div key={t._id}
                         className={`team-pill ${selectedTeam?._id === t._id ? "active" : ""}`}
                         onClick={() => {
                             setSelectedTeam(t);
                             setCurrentPlayer(null);
-                        }}
-                    >
+                        }}>
                         {t.name} ₹{t.purse}
                         <span onClick={(e) => {
                             e.stopPropagation();
@@ -982,49 +1289,37 @@ function Auction() {
 
             <div className="main-layout">
 
-                {/* LEFT */}
                 <div className="left-panel">
                     <h3>Unsold Players</h3>
-
                     {loading && <p>Loading...</p>}
 
-                    {players.filter(p => p.status !== "sold").map(p => (
-                        <div key={p._id} className="player-row"
-                            onClick={() => {
-                                setCurrentPlayer(p);
-                                setSelectedTeam(null);
-                            }}>
-                            <img src={getImg(p.photo)} alt="" />
-                            <div>{p.name}</div>
-                        </div>
-                    ))}
+                    {Array.isArray(players) &&
+                        players.filter(p => p.status !== "sold").map(p => (
+                            <div key={p._id} className="player-row"
+                                onClick={() => {
+                                    setCurrentPlayer(p);
+                                    setSelectedTeam(null);
+                                }}>
+                                <img src={getImg(p.photo)} alt="" />
+                                <div>{p.name}</div>
+                            </div>
+                        ))}
                 </div>
 
-                {/* RIGHT */}
                 <div className="right-panel">
 
                     {selectedTeam && (
                         <>
-                            <div className="export-buttons">
-                                <button onClick={downloadPDF}>PDF</button>
-                                <button onClick={downloadExcel}>Excel</button>
-                            </div>
-
-                            <h2>{selectedTeam.name} Players</h2>
+                            <button onClick={downloadPDF}>PDF</button>
+                            <button onClick={downloadExcel}>Excel</button>
 
                             <div className="team-grid">
                                 {selectedTeam.players?.map(p => (
                                     <div className="team-card" key={p._id}>
                                         <img src={getImg(p.playerId?.photo)} alt="" />
-                                        <h3>{p.playerId?.name}</h3>
-                                        <p>{p.playerId?.role}</p>
+                                        <h3>{p.playerId?.name || "-"}</h3>
+                                        <p>{p.playerId?.role || "-"}</p>
                                         <p>₹{p.price}</p>
-
-                                        <button onClick={() =>
-                                            unsoldPlayer(p.playerId?._id, selectedTeam?._id)
-                                        }>
-                                            Remove
-                                        </button>
                                     </div>
                                 ))}
                             </div>
@@ -1034,9 +1329,7 @@ function Auction() {
                     {!selectedTeam && currentPlayer && (
                         <div className="auction-card">
                             <img src={getImg(currentPlayer.photo)} alt="" />
-
                             <h2>{currentPlayer.name}</h2>
-                            <p>{currentPlayer.role}</p>
 
                             <h1>₹{price}</h1>
 
@@ -1059,6 +1352,5 @@ function Auction() {
         </div>
     );
 }
-console.log(getImg(player.photo));
 
 export default Auction;
