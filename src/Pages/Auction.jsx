@@ -151,27 +151,39 @@ function Auction() {
 
     /* ================= EXPORT PDF ================= */
     const downloadPDF = async () => {
+        if (!activeTeamTab) {
+            alert("Select team first");
+            return;
+        }
+
         const pdf = new jsPDF();
 
         const getBase64 = async (url) => {
-            const res = await fetch(url);
-            const blob = await res.blob();
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
-                reader.readAsDataURL(blob);
-            });
+            try {
+                const res = await fetch(url);
+                const blob = await res.blob();
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.readAsDataURL(blob);
+                });
+            } catch {
+                return null;
+            }
         };
 
-        // ===== HEADER =====
-        try {
-            const logo = await getBase64("BatballVc");
-            pdf.addImage(logo, "PNG", 10, 5, 18, 18);
-        } catch { }
+        // ✅ GET TEAM OBJECT CORRECTLY
+        const team = teams.find(t => t._id === activeTeamTab);
 
+        if (!team) {
+            alert("Team not found");
+            return;
+        }
+
+        // ===== HEADER =====
         pdf.setFontSize(18);
         pdf.setFont(undefined, "bold");
-        pdf.text(selectedTeam.name.toUpperCase(), 105, 12, { align: "center" });
+        pdf.text(team.name.toUpperCase(), 105, 12, { align: "center" });
 
         pdf.setFontSize(11);
         pdf.setFont(undefined, "normal");
@@ -185,41 +197,47 @@ function Auction() {
         const cardHeight = 50;
         const gap = 10;
 
-        for (let p of selectedTeam.players) {
+        const players = team.players || [];
+
+        for (let p of players) {
             const player = p.playerId;
+
+            if (!player) continue; // safety
 
             // CARD BORDER
             pdf.setDrawColor(200);
-            pdf.rect(x, y, cardWidth, cardHeight, 3);
+            pdf.rect(x, y, cardWidth, cardHeight);
 
-            // PLAYER IMAGE
+            // IMAGE (SAFE)
             try {
                 const img = await getBase64(getImg(player.photo));
-                pdf.addImage(img, "JPEG", x + 3, y + 5, 20, 20);
+                if (img) {
+                    pdf.addImage(img, "JPEG", x + 3, y + 5, 20, 20);
+                }
             } catch { }
 
-            // NAME (BOLD)
+            // NAME
             pdf.setFontSize(11);
             pdf.setFont(undefined, "bold");
-            pdf.text(player.name.toUpperCase(), x + 28, y + 10);
+            pdf.text((player.name || "").toUpperCase(), x + 28, y + 10);
 
             // ROLE + VILLAGE
             pdf.setFontSize(9);
             pdf.setFont(undefined, "normal");
-            pdf.text(player.role, x + 28, y + 16);
-            pdf.text(player.village, x + 28, y + 21);
+            pdf.text(player.role || "-", x + 28, y + 16);
+            pdf.text(player.village || "-", x + 28, y + 21);
 
-            // DIVIDER LINE
+            // LINE
             pdf.setDrawColor(220);
             pdf.line(x + 3, y + 28, x + cardWidth - 3, y + 28);
 
             // DETAILS
             pdf.setFontSize(9);
-            pdf.text(`Bid: ₹${p.price}`, x + 5, y + 35);
-            pdf.text(`Shirt: ${player.tshirtSize}`, x + 5, y + 41);
-            pdf.text(`Pant: ${player.pantSize}`, x + 45, y + 41);
+            pdf.text(`Bid: ₹${p.price || 0}`, x + 5, y + 35);
+            pdf.text(`Shirt: ${player.tshirtSize || "-"}`, x + 5, y + 41);
+            pdf.text(`Pant: ${player.pantSize || "-"}`, x + 45, y + 41);
 
-            // NEXT CARD POSITION
+            // NEXT POSITION
             x += cardWidth + gap;
 
             if (x + cardWidth > 200) {
@@ -234,7 +252,7 @@ function Auction() {
             }
         }
 
-        pdf.save(`${selectedTeam.name}.pdf`);
+        pdf.save(`${team.name}.pdf`);
     };
 
     /* ================= EXPORT EXCEL ================= */
