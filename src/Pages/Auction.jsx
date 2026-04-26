@@ -807,46 +807,47 @@ function Auction() {
                     {!selectedTeam && currentPlayer && (
                         <div className="auction-card">
 
-                            <img
-                                src={getImg(currentPlayer.photo)}
-                                onError={(e) => e.target.src = "/default.jpg"}
-                                alt=""
-                            />
-
-                            <h2>{currentPlayer.name}</h2>
-                            <p>{currentPlayer.role}</p>
-
-                            <h1>₹{price}</h1>
-
-                            <div className="bid-buttons">
-                                <button onClick={() => setPrice(price + 100)}>+100</button>
-                                <button onClick={() => setPrice(price + 200)}>+200</button>
-                                <button onClick={() => setPrice(price + 500)}>+500</button>
-                                <button onClick={() => setPrice(price + 1000)}>+1000</button>
+                            <div className="card-left">
+                                <img src={getImg(currentPlayer.photo)} />
                             </div>
 
-                            <input
-                                placeholder="Enter total bid"
-                                value={customBid}
-                                onChange={(e) => {
-                                    setCustomBid(e.target.value);
-                                    setPrice(Number(e.target.value));
-                                }}
-                            />
+                            <div className="card-right">
 
-                            <select onChange={(e) => setTeamId(e.target.value)}>
-                                <option>Select Team</option>
-                                {teams.map(t => (
-                                    <option key={t._id} value={t._id}>
-                                        {t.name}
-                                    </option>
-                                ))}
-                            </select>
+                                <h2>{currentPlayer.name}</h2>
+                                <p>{currentPlayer.role}</p>
 
-                            <button className="sell-btn" onClick={sellPlayer}>
-                                SELL PLAYER
-                            </button>
+                                <h1>₹{price}</h1>
 
+                                <div className="bid-buttons">
+                                    <button onClick={() => setPrice(price + 100)}>+100</button>
+                                    <button onClick={() => setPrice(price + 200)}>+200</button>
+                                    <button onClick={() => setPrice(price + 500)}>+500</button>
+                                    <button onClick={() => setPrice(price + 1000)}>+1000</button>
+                                </div>
+
+                                <input
+                                    placeholder="Enter total bid"
+                                    value={customBid}
+                                    onChange={(e) => {
+                                        setCustomBid(e.target.value);
+                                        setPrice(Number(e.target.value));
+                                    }}
+                                />
+
+                                <select onChange={(e) => setTeamId(e.target.value)}>
+                                    <option>Select Team</option>
+                                    {teams.map(t => (
+                                        <option key={t._id} value={t._id}>
+                                            {t.name}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                <button className="sell-btn" onClick={sellPlayer}>
+                                    SELL PLAYER
+                                </button>
+
+                            </div>
                         </div>
                     )}
 
