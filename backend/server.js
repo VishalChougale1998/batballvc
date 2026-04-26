@@ -27,18 +27,23 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+/* ================= CREATE UPLOADS FOLDER ================= */
+const uploadsPath = path.join(__dirname, "uploads");
+
 /* ================= FILE UPLOAD ================= */
 const storage = multer.diskStorage({
-    destination: "uploads/",
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname);
+    destination: function (req, file, cb) {
+        cb(null, uploadsPath);
     },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + "-" + file.originalname);
+    }
 });
 
 const upload = multer({ storage });
 
-/* 🔥 FIXED STATIC (IMPORTANT FOR RENDER) */
-app.use("/uploads", express.static("uploads"));
+/* ================= STATIC FILES (FIXED) ================= */
+app.use("/uploads", express.static(uploadsPath));
 
 /* ================= DB ================= */
 mongoose.connect(process.env.MONGO_URI)
@@ -97,7 +102,7 @@ app.post("/api/create-league", upload.single("banner"), async (req, res) => {
             slug: slug || name.toLowerCase().replace(/\s+/g, "-"),
             entryFee: Number(entryFee) || 0,
             lastDate: lastDate ? new Date(lastDate) : null,
-            banner: req.file ? req.file.filename : (req.body.photo || "")
+            banner: req.file ? req.file.filename : ""
         });
 
         res.json(league);
@@ -189,32 +194,24 @@ app.get("/api/teams/with-players/:leagueId", async (req, res) => {
     }
 });
 
-/* ---------- DELETE TEAM (FULL FIX) ---------- */
+/* ---------- DELETE TEAM ---------- */
 app.delete("/api/teams/:id", async (req, res) => {
     try {
         const teamId = req.params.id;
 
         const team = await Team.findById(teamId);
-        if (!team) {
-            return res.status(404).json({ success: false });
-        }
+        if (!team) return res.status(404).json({ success: false });
 
-        // reset players
         await Player.updateMany(
-            { teamId: teamId },
-            {
-                status: "unsold",
-                teamId: null,
-                price: 0
-            }
+            { teamId },
+            { status: "unsold", teamId: null, price: 0 }
         );
 
         await Team.findByIdAndDelete(teamId);
 
         res.json({ success: true });
 
-    } catch (err) {
-        console.error(err);
+    } catch {
         res.status(500).json({ success: false });
     }
 });
@@ -248,7 +245,7 @@ app.post("/api/teams/add-player", async (req, res) => {
     }
 });
 
-/* ---------- REMOVE PLAYER (FIXED) ---------- */
+/* ---------- REMOVE PLAYER ---------- */
 app.post("/api/teams/remove-player", async (req, res) => {
     try {
         const { playerId, teamId } = req.body;
