@@ -701,8 +701,6 @@ function Auction() {
     const downloadPDF = async () => {
         const pdf = new jsPDF();
 
-        // ================= LOGO =================
-        const logoUrl = "/logo.png"; // put logo in public folder
         const getBase64 = async (url) => {
             const res = await fetch(url);
             const blob = await res.blob();
@@ -713,52 +711,63 @@ function Auction() {
             });
         };
 
-        let logoBase64 = "";
+        // ===== HEADER =====
         try {
-            logoBase64 = await getBase64(logoUrl);
-            pdf.addImage(logoBase64, "PNG", 10, 5, 20, 20);
+            const logo = await getBase64("/logo.png");
+            pdf.addImage(logo, "PNG", 10, 5, 18, 18);
         } catch { }
 
-        // ================= HEADER =================
-        pdf.setFontSize(16);
-        pdf.text(selectedTeam.name.toUpperCase(), 105, 15, { align: "center" });
+        pdf.setFontSize(18);
+        pdf.setFont(undefined, "bold");
+        pdf.text(selectedTeam.name.toUpperCase(), 105, 12, { align: "center" });
 
-        pdf.setFontSize(10);
-        pdf.text("Team Players List", 105, 22, { align: "center" });
+        pdf.setFontSize(11);
+        pdf.setFont(undefined, "normal");
+        pdf.text("Team Players List", 105, 18, { align: "center" });
 
-        // ================= CARD SETTINGS =================
+        // ===== CARD SETTINGS =====
         let x = 10;
         let y = 30;
 
         const cardWidth = 90;
-        const cardHeight = 60;
+        const cardHeight = 50;
         const gap = 10;
 
         for (let p of selectedTeam.players) {
             const player = p.playerId;
 
-            // DRAW CARD
-            pdf.setDrawColor(0);
-            pdf.rect(x, y, cardWidth, cardHeight);
+            // CARD BORDER
+            pdf.setDrawColor(200);
+            pdf.rect(x, y, cardWidth, cardHeight, 3);
 
-            // IMAGE
+            // PLAYER IMAGE
             try {
-                const imgBase64 = await getBase64(getImg(player.photo));
-                pdf.addImage(imgBase64, "JPEG", x + 3, y + 3, 25, 25);
+                const img = await getBase64(getImg(player.photo));
+                pdf.addImage(img, "JPEG", x + 3, y + 5, 20, 20);
             } catch { }
 
-            // TEXT
-            pdf.setFontSize(10);
+            // NAME (BOLD)
+            pdf.setFontSize(11);
+            pdf.setFont(undefined, "bold");
+            pdf.text(player.name.toUpperCase(), x + 28, y + 10);
 
-            pdf.text(`Name: ${player.name}`, x + 30, y + 10);
-            pdf.text(`Role: ${player.role}`, x + 30, y + 16);
-            pdf.text(`Village: ${player.village}`, x + 30, y + 22);
+            // ROLE + VILLAGE
+            pdf.setFontSize(9);
+            pdf.setFont(undefined, "normal");
+            pdf.text(player.role, x + 28, y + 16);
+            pdf.text(player.village, x + 28, y + 21);
 
+            // DIVIDER LINE
+            pdf.setDrawColor(220);
+            pdf.line(x + 3, y + 28, x + cardWidth - 3, y + 28);
+
+            // DETAILS
+            pdf.setFontSize(9);
             pdf.text(`Bid: ₹${p.price}`, x + 5, y + 35);
-            pdf.text(`Shirt: ${player.tshirtSize}`, x + 5, y + 42);
-            pdf.text(`Pant: ${player.pantSize}`, x + 5, y + 49);
+            pdf.text(`Shirt: ${player.tshirtSize}`, x + 5, y + 41);
+            pdf.text(`Pant: ${player.pantSize}`, x + 45, y + 41);
 
-            // NEXT POSITION
+            // NEXT CARD POSITION
             x += cardWidth + gap;
 
             if (x + cardWidth > 200) {
@@ -766,7 +775,6 @@ function Auction() {
                 y += cardHeight + gap;
             }
 
-            // NEW PAGE
             if (y + cardHeight > 280) {
                 pdf.addPage();
                 x = 10;
