@@ -582,9 +582,12 @@ function Auction() {
             pdf.rect(x, y, cardWidth, cardHeight);
 
             pdf.setFontSize(10);
+            pdf.img(player.photo ? getImg(player.photo) : "/default.jpg", "JPEG", x + 3, y + 5, 20, 20);
             pdf.text(player.name || "", x + 5, y + 10);
             pdf.text(player.role || "-", x + 5, y + 16);
             pdf.text(player.village || "-", x + 5, y + 22);
+            pdf.text(`Shirt: ${player.tshirtSize || "-"}`, x + 5, y + 28);
+            pdf.text(`Pant: ${player.pantSize || "-"}`, x + 45, y + 28);
 
             pdf.text(`₹${p.price}`, x + 5, y + 30);
 
