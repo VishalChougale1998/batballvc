@@ -12,7 +12,7 @@ function RegisterLeagues() {
     }, []);
 
     return (
-        <>
+        <><div className="main-container">
             <h2 className="text-center mb-4">📝 Register Player</h2>
 
             <div className="leagues-container">
@@ -20,7 +20,7 @@ function RegisterLeagues() {
                 {leagues.map(l => (
                     <LeagueCard key={l._id} league={l} showRegister={true} />
                 ))}
-            </div>
+            </div></div>
         </>
     );
 }
