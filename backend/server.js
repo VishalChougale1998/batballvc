@@ -27,22 +27,19 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* ================= CREATE UPLOADS FOLDER ================= */
+/* ================= UPLOADS ================= */
 const uploadsPath = path.join(__dirname, "uploads");
 
-/* ================= FILE UPLOAD ================= */
+/* ================= MULTER ================= */
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadsPath);
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + "-" + file.originalname);
-    }
+    destination: (req, file, cb) => cb(null, uploadsPath),
+    filename: (req, file, cb) =>
+        cb(null, Date.now() + "-" + file.originalname)
 });
 
 const upload = multer({ storage });
 
-/* ================= STATIC FILES (FIXED) ================= */
+/* ================= STATIC FILES ================= */
 app.use("/uploads", express.static(uploadsPath));
 
 /* ================= DB ================= */
@@ -199,9 +196,6 @@ app.delete("/api/teams/:id", async (req, res) => {
     try {
         const teamId = req.params.id;
 
-        const team = await Team.findById(teamId);
-        if (!team) return res.status(404).json({ success: false });
-
         await Player.updateMany(
             { teamId },
             { status: "unsold", teamId: null, price: 0 }
@@ -210,7 +204,6 @@ app.delete("/api/teams/:id", async (req, res) => {
         await Team.findByIdAndDelete(teamId);
 
         res.json({ success: true });
-
     } catch {
         res.status(500).json({ success: false });
     }
@@ -225,9 +218,14 @@ app.post("/api/teams/add-player", async (req, res) => {
         const team = await Team.findById(teamId);
         const player = await Player.findById(playerId);
 
-        if (!team || !player) return res.status(404).json({ msg: "Not found" });
-        if (player.status === "sold") return res.status(400).json({ msg: "Already sold" });
-        if (team.purse < price) return res.status(400).json({ msg: "Low purse" });
+        if (!team || !player)
+            return res.status(404).json({ msg: "Not found" });
+
+        if (player.status === "sold")
+            return res.status(400).json({ msg: "Already sold" });
+
+        if (team.purse < price)
+            return res.status(400).json({ msg: "Low purse" });
 
         player.status = "sold";
         player.teamId = teamId;
@@ -253,9 +251,8 @@ app.post("/api/teams/remove-player", async (req, res) => {
         const team = await Team.findById(teamId);
         const player = await Player.findById(playerId);
 
-        if (!team || !player) {
+        if (!team || !player)
             return res.status(404).json({ msg: "Not found" });
-        }
 
         const existing = team.players.find(
             p => p.playerId.toString() === playerId
@@ -265,9 +262,7 @@ app.post("/api/teams/remove-player", async (req, res) => {
             p => p.playerId.toString() !== playerId
         );
 
-        if (existing) {
-            team.purse += existing.price;
-        }
+        if (existing) team.purse += existing.price;
 
         await team.save();
 
@@ -279,7 +274,6 @@ app.post("/api/teams/remove-player", async (req, res) => {
         res.json({ success: true });
 
     } catch (err) {
-        console.error(err);
         res.status(500).json({ msg: "Error removing player" });
     }
 });
@@ -287,21 +281,17 @@ app.post("/api/teams/remove-player", async (req, res) => {
 /* ---------- PAYMENT ---------- */
 app.use("/api/payment", paymentRoutes);
 
-/* ================= SERVER ================= */
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => console.log(`Server running on ${PORT}`));
-
-
-// ==========refresh===========
-
-import path from "path";
+/* ================= FRONTEND SERVE (REFRESH FIX) ================= */
 
 const frontendPath = path.join(__dirname, "../frontend/dist");
 
 app.use(express.static(frontendPath));
 
-// ⚡ THIS IS THE MAIN FIX
 app.get("*", (req, res) => {
     res.sendFile(path.join(frontendPath, "index.html"));
 });
+
+/* ================= SERVER ================= */
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));

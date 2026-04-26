@@ -10,6 +10,7 @@ import Navbar from "./Components/Navbar";
 import ViewLeagues from "./Pages/ViewLeagues";
 import RegisterLeagues from "./Pages/RegisterLeagues";
 import AdminLogin from "./Pages/AdminLogin";
+// import FixedAdmin from "./Pages/FixedAdmin";
 import FixedAdmin from "./Pages/FixedAdmin";
 import Footer from "./Components/Footer";
 
