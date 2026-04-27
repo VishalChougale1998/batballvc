@@ -42,18 +42,9 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 /* ================= MIDDLEWARE ================= */
-
-/* 🔥 FIXED CORS (VERY IMPORTANT) */
 app.use(cors({
-    origin: [
-        "https://batballvc-1.onrender.com", // frontend
-        "http://localhost:5174",            // local dev
-        "http://localhost:5173"
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+    origin: "*", // 🔥 for now allow all (fixes your issue)
 }));
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -61,6 +52,46 @@ app.use(express.urlencoded({ extended: true }));
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("MongoDB Connected"))
     .catch(err => console.log("Mongo Error:", err));
+
+/* ================= MODELS ================= */
+
+// ✅ LEAGUE
+const League = mongoose.model("League", new mongoose.Schema({
+    name: String,
+    village: String,
+    slug: String,
+    banner: String,
+    entryFee: Number,
+    lastDate: Date,
+}, { timestamps: true }));
+
+// ✅ PLAYER
+const Player = mongoose.model("Player", new mongoose.Schema({
+    name: String,
+    role: String,
+    village: String,
+    mobile: String,
+    leagueId: String,
+    photo: String,
+    tshirtSize: String,
+    pantSize: String,
+    status: { type: String, default: "unsold" },
+    teamId: { type: mongoose.Schema.Types.ObjectId, ref: "Team" },
+    price: Number,
+}, { timestamps: true }));
+
+// ✅ TEAM
+const Team = mongoose.model("Team", new mongoose.Schema({
+    name: String,
+    purse: Number,
+    leagueId: String,
+    players: [
+        {
+            playerId: { type: mongoose.Schema.Types.ObjectId, ref: "Player" },
+            price: Number,
+        },
+    ],
+}, { timestamps: true }));
 
 /* ================= ROUTES ================= */
 
@@ -71,7 +102,7 @@ app.post("/api/create-league", upload.single("banner"), async (req, res) => {
     try {
         const league = await League.create({
             ...req.body,
-            banner: req.file?.path || ""
+            banner: req.file?.path || "",
         });
         res.json(league);
     } catch (err) {
@@ -86,6 +117,7 @@ app.get("/api/leagues", async (req, res) => {
         const leagues = await League.find().sort({ createdAt: -1 });
         res.json(leagues);
     } catch (err) {
+        console.error("League error:", err);
         res.status(500).json({ msg: err.message });
     }
 });
@@ -96,7 +128,7 @@ app.post("/api/register", upload.single("photo"), async (req, res) => {
         const player = await Player.create({
             ...req.body,
             leagueId: String(req.body.leagueId),
-            photo: req.file?.path || ""
+            photo: req.file?.path || "",
         });
         res.json(player);
     } catch (err) {
@@ -109,7 +141,7 @@ app.post("/api/register", upload.single("photo"), async (req, res) => {
 app.get("/api/players/:leagueId", async (req, res) => {
     try {
         const players = await Player.find({
-            leagueId: String(req.params.leagueId)
+            leagueId: String(req.params.leagueId),
         });
         res.json(players);
     } catch (err) {
@@ -137,7 +169,7 @@ app.post("/api/teams", async (req, res) => {
 app.get("/api/teams/with-players/:leagueId", async (req, res) => {
     try {
         const teams = await Team.find({
-            leagueId: String(req.params.leagueId)
+            leagueId: String(req.params.leagueId),
         }).populate("players.playerId");
 
         res.json(teams);
@@ -191,7 +223,7 @@ app.post("/api/teams/remove-player", async (req, res) => {
         await player.save();
 
         team.players = team.players.filter(
-            p => p.playerId.toString() !== playerId
+            (p) => p.playerId.toString() !== playerId
         );
 
         await team.save();
