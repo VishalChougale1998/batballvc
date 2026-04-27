@@ -10,9 +10,11 @@ function RegisterPlayer() {
     const { leagueId } = useParams();
     const navigate = useNavigate();
     const receiptRef = useRef();
+    const checkedRef = useRef(false);
 
     const [league, setLeague] = useState(null);
     const [photo, setPhoto] = useState(null);
+    const [preview, setPreview] = useState(null);
     const [showReceipt, setShowReceipt] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -27,24 +29,27 @@ function RegisterPlayer() {
     // ================= FETCH LEAGUE =================
     useEffect(() => {
         fetch(`${BASE_URL}/api/leagues`)
-            .then(res => res.json())
-            .then(data => {
-                const found = data.find(l => l._id === leagueId);
+            .then((res) => res.json())
+            .then((data) => {
+                const found = data.find((l) => l._id === leagueId);
                 setLeague(found);
             })
             .catch(() => alert("Failed to load league"));
     }, [leagueId]);
 
-    // ================= EXPIRY CHECK =================
-    const isExpired =
-        league && new Date() > new Date(league.lastDate);
-
+    // ================= FIX EXPIRY LOOP =================
     useEffect(() => {
-        if (league && isExpired) {
-            alert("Registration Closed ❌");
-            navigate("/view-leagues");
+        if (league && !checkedRef.current) {
+            checkedRef.current = true;
+
+            const expired = new Date() > new Date(league.lastDate);
+
+            if (expired) {
+                alert("Registration Closed ❌");
+                navigate("/view-leagues");
+            }
         }
-    }, [league, isExpired, navigate]);
+    }, [league, navigate]);
 
     // ================= INPUT =================
     const handleChange = (e) => {
@@ -53,6 +58,31 @@ function RegisterPlayer() {
             [e.target.name]: e.target.value
         });
     };
+
+    // ================= IMAGE PREVIEW (FIXED) =================
+    const handlePhotoChange = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Cleanup old preview (VERY IMPORTANT)
+        if (preview) {
+            URL.revokeObjectURL(preview);
+        }
+
+        const objectUrl = URL.createObjectURL(file);
+
+        setPhoto(file);
+        setPreview(objectUrl);
+    };
+
+    // Cleanup on unmount (prevent memory leak)
+    useEffect(() => {
+        return () => {
+            if (preview) {
+                URL.revokeObjectURL(preview);
+            }
+        };
+    }, [preview]);
 
     // ================= SAVE PLAYER =================
     const handleSubmit = async () => {
@@ -79,6 +109,7 @@ function RegisterPlayer() {
             setShowReceipt(true);
 
         } catch (err) {
+            console.error(err);
             alert("Registration failed ❌");
         }
     };
@@ -92,7 +123,6 @@ function RegisterPlayer() {
         }
 
         if (!league) return alert("Loading...");
-        if (isExpired) return alert("Registration Closed ❌");
 
         try {
             const res = await fetch(`${BASE_URL}/api/payment/create-order`, {
@@ -125,6 +155,7 @@ function RegisterPlayer() {
             rzp.open();
 
         } catch (err) {
+            console.error(err);
             alert("Payment failed ❌");
         }
     };
@@ -132,31 +163,13 @@ function RegisterPlayer() {
     // ================= PDF =================
     const downloadPDF = async () => {
         try {
-            const input = receiptRef.current;
-            const canvas = await html2canvas(input, { scale: 2 });
+            const canvas = await html2canvas(receiptRef.current, { scale: 2 });
             const imgData = canvas.toDataURL("image/png");
 
-            const pdf = new jsPDF("p", "mm", "a4");
-
-            const logoImg = new Image();
-            logoImg.src = "/logo.png"; // keep logo in public folder
-
-            logoImg.onload = () => {
-                pdf.addImage(logoImg, "PNG", 80, 10, 50, 20);
-
-                const imgWidth = 190;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-                pdf.addImage(imgData, "PNG", 10, 40, imgWidth, imgHeight);
-                pdf.save("BatBall_Receipt.pdf");
-            };
-
-            logoImg.onerror = () => {
-                pdf.addImage(imgData, "PNG", 10, 10, 190, 0);
-                pdf.save("BatBall_Receipt.pdf");
-            };
-
-        } catch (error) {
+            const pdf = new jsPDF();
+            pdf.addImage(imgData, "PNG", 10, 10, 180, 0);
+            pdf.save("Receipt.pdf");
+        } catch {
             alert("PDF failed ❌");
         }
     };
@@ -165,21 +178,10 @@ function RegisterPlayer() {
     if (showReceipt) {
         return (
             <div className="view-container">
-
                 <div className="form-wrapper">
-
-                    <div
-                        ref={receiptRef}
-                        className="form-card"
-                        style={{ background: "white", color: "black" }}
-                    >
-                        <h2 className="text-success text-center">
-                            Payment Successful ✅
-                        </h2>
-
-                        <h4 className="text-center">
-                            {league?.name}
-                        </h4>
+                    <div ref={receiptRef} className="form-card" style={{ background: "white", color: "black" }}>
+                        <h2 className="text-success text-center">Payment Successful ✅</h2>
+                        <h4 className="text-center">{league?.name}</h4>
 
                         <hr />
 
@@ -190,15 +192,9 @@ function RegisterPlayer() {
 
                         <hr />
 
-                        <h3 className="text-center text-warning">
-                            ₹{league?.entryFee}
-                        </h3>
-
-                        <p className="text-center">
-                            {new Date().toLocaleString()}
-                        </p>
+                        <h3 className="text-center text-warning">₹{league?.entryFee}</h3>
+                        <p className="text-center">{new Date().toLocaleString()}</p>
                     </div>
-
                 </div>
 
                 <div className="text-center mt-3">
@@ -206,7 +202,6 @@ function RegisterPlayer() {
                         Download PDF 📄
                     </button>
                 </div>
-
             </div>
         );
     }
@@ -214,24 +209,32 @@ function RegisterPlayer() {
     // ================= FORM =================
     return (
         <div className="view-container">
-
             <div className="form-wrapper">
-
                 <div className="form-card">
 
-                    <h2 className="text-center mb-3">
-                        🏏 Player Registration
-                    </h2>
-
-                    <h4 className="text-center">
-                        {league?.name}
-                    </h4>
+                    <h2 className="text-center mb-3">🏏 Player Registration</h2>
+                    <h4 className="text-center">{league?.name}</h4>
 
                     <p className="text-center text-warning">
                         Entry Fee: ₹{league?.entryFee}
                     </p>
 
                     <hr />
+
+                    {/* ✅ FIXED IMAGE PREVIEW */}
+                    <div className="text-center">
+                        <img
+                            src={preview || "/default.png"}
+                            alt="preview"
+                            className="player-image"
+                            style={{
+                                width: "120px",
+                                height: "120px",
+                                objectFit: "cover",
+                                borderRadius: "10px"
+                            }}
+                        />
+                    </div>
 
                     <input className="input-field" name="name" placeholder="Name" onChange={handleChange} />
                     <input className="input-field" name="village" placeholder="Village" onChange={handleChange} />
@@ -250,7 +253,8 @@ function RegisterPlayer() {
                     <input
                         type="file"
                         className="input-field"
-                        onChange={(e) => setPhoto(e.target.files[0])}
+                        accept="image/*"
+                        onChange={handlePhotoChange}
                     />
 
                     <button className="league-btn mt-2" onClick={handlePayment}>
@@ -258,9 +262,7 @@ function RegisterPlayer() {
                     </button>
 
                 </div>
-
             </div>
-
         </div>
     );
 }

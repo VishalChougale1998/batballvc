@@ -3,12 +3,20 @@ import BASE_URL from "../api";
 import "./LeagueCard.css";
 
 function LeagueCard({ league = {}, showRegister }) {
+
+    console.log("Banner:", league.banner);
     const navigate = useNavigate();
 
-    // ✅ Safe image URL
-    const imageUrl = league.banner
-        ? `${BASE_URL}/uploads/${league.banner}`
-        : "/default.jpg";
+    // ✅ FIXED IMAGE HANDLER
+    const getImg = (img) => {
+        if (!img) return "/default.png";
+
+        // Cloudinary / external image
+        if (img.startsWith("http")) return img;
+
+        // Local upload fallback
+        return `${BASE_URL}/uploads/${img}`;
+    };
 
     // ✅ Safe date formatting
     const formattedDate = league.lastDate
@@ -20,12 +28,12 @@ function LeagueCard({ league = {}, showRegister }) {
 
             {/* ✅ IMAGE */}
             <img
-                src={imageUrl}
+                src={getImg(league.banner)}
                 alt={league.name || "League"}
                 className="league-img"
                 onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = "/default.jpg";
+                    e.target.src = "/default.png";
                 }}
             />
 

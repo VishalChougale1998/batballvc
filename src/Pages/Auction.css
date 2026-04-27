@@ -89,11 +89,9 @@
     display: flex;
     align-items: center;
     gap: 10px;
-
     background: #334155;
     margin-bottom: 10px;
     padding: 10px;
-
     border-radius: 10px;
     cursor: pointer;
     transition: 0.2s;
@@ -121,20 +119,18 @@
 .auction-card {
     display: flex;
     gap: 20px;
-
     background: #1e293b;
     padding: 20px;
     border-radius: 15px;
-
     width: 600px;
     max-width: 100%;
-
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
 }
 
-/* IMAGE */
+/* IMAGE LEFT */
 .card-left {
     width: 180px;
+    flex-shrink: 0;
 }
 
 .card-left img {
@@ -144,7 +140,7 @@
     border-radius: 10px;
 }
 
-/* DETAILS */
+/* DETAILS RIGHT */
 .card-right {
     flex: 1;
     display: flex;
@@ -158,6 +154,7 @@
 
 .card-right p {
     color: #94a3b8;
+    margin-bottom: 5px;
 }
 
 /* PRICE */
@@ -203,6 +200,7 @@
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 10px;
+    border: none;
 }
 
 /* SELL BUTTON */
@@ -270,5 +268,9 @@
 
     .card-left {
         width: 100%;
+    }
+
+    .card-left img {
+        height: 250px;
     }
 }

@@ -2,12 +2,23 @@ import "./Admin.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+// ✅ Vite env (with fallback)
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+// ✅ Handles Cloudinary + old local uploads + fallback
+const getImage = (img) => {
+    if (!img) return "/default.png";
+
+    // Cloudinary URL
+    if (img.startsWith("http")) return img;
+
+    // Old local upload
+    return `${BASE_URL}/uploads/${img}`;
+};
 
 function FixedAdmin() {
     const navigate = useNavigate();
 
-    // ================= STATES =================
     const [players, setPlayers] = useState([]);
     const [leagues, setLeagues] = useState([]);
     const [activeLeague, setActiveLeague] = useState("");
@@ -17,39 +28,43 @@ function FixedAdmin() {
         name: "",
         city: "",
         fee: "",
-        limit: "",
         lastDate: "",
-        slug: ""
+        slug: "",
     });
 
-    const [registrationLink, setRegistrationLink] = useState("");
-
-    // ================= FETCH DATA =================
+    // ================= FETCH =================
     useEffect(() => {
         fetchLeagues();
     }, []);
 
     const fetchLeagues = async () => {
-        const res = await fetch(`${BASE_URL}/api/leagues`);
-        const data = await res.json();
-        setLeagues(data);
+        try {
+            const res = await fetch(`${BASE_URL}/api/leagues`);
+            const data = await res.json();
+            setLeagues(data);
+        } catch (err) {
+            console.error("Fetch leagues error:", err);
+        }
     };
 
     const fetchPlayers = async (leagueId) => {
-        const res = await fetch(`${BASE_URL}/api/players/${leagueId}`);
-        const data = await res.json();
-        setPlayers(data);
+        try {
+            const res = await fetch(`${BASE_URL}/api/players/${leagueId}`);
+            const data = await res.json();
+            setPlayers(data);
+        } catch (err) {
+            console.error("Fetch players error:", err);
+        }
     };
 
     // ================= INPUT =================
     const handleChange = (e) => {
         setLeague({
             ...league,
-            [e.target.name]: e.target.value
+            [e.target.name]: e.target.value,
         });
     };
 
-    // ================= IMAGE UPLOAD =================
     const handleImageUpload = (e) => {
         setBannerFile(e.target.files[0]);
     };
@@ -66,7 +81,6 @@ function FixedAdmin() {
             formData.append("name", league.name);
             formData.append("village", league.city);
             formData.append("entryFee", league.fee);
-            formData.append("playerLimit", league.limit);
             formData.append("lastDate", league.lastDate);
             formData.append("slug", league.slug);
 
@@ -74,60 +88,79 @@ function FixedAdmin() {
                 formData.append("banner", bannerFile);
             }
 
-            await fetch(`${BASE_URL}/api/create-league`, {
+            const res = await fetch(`${BASE_URL}/api/create-league`, {
                 method: "POST",
-                body: formData
+                body: formData,
             });
 
+            const text = await res.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch {
+                console.error("Not JSON:", text);
+            }
+
+            if (!res.ok) {
+                alert(data?.msg || "Failed to create league ❌");
+                return;
+            }
+
             alert("League Created ✅");
+
             fetchLeagues();
 
             setLeague({
                 name: "",
                 city: "",
                 fee: "",
-                limit: "",
                 lastDate: "",
-                slug: ""
+                slug: "",
             });
 
             setBannerFile(null);
-
         } catch (err) {
+            console.error(err);
             alert("Failed to create league ❌");
         }
     };
 
-    // ================= DELETE LEAGUE =================
+    // ================= DELETE =================
     const handleDeleteLeague = async (id) => {
         if (!window.confirm("Delete this league?")) return;
 
-        await fetch(`${BASE_URL}/api/leagues/${id}`, {
-            method: "DELETE"
-        });
+        try {
+            await fetch(`${BASE_URL}/api/leagues/${id}`, {
+                method: "DELETE",
+            });
 
-        fetchLeagues();
-        setActiveLeague("");
+            fetchLeagues();
+            setActiveLeague("");
+        } catch (err) {
+            console.error(err);
+        }
     };
 
-    // ================= DELETE PLAYER =================
     const handleDeletePlayer = async (id) => {
         if (!window.confirm("Delete player?")) return;
 
-        await fetch(`${BASE_URL}/api/players/${id}`, {
-            method: "DELETE"
-        });
+        try {
+            await fetch(`${BASE_URL}/api/players/${id}`, {
+                method: "DELETE",
+            });
 
-        fetchPlayers(activeLeague);
+            fetchPlayers(activeLeague);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
-    // ================= SELECT LEAGUE =================
+    // ================= SELECT =================
     const handleSelectLeague = (lg) => {
         setActiveLeague(lg._id);
         fetchPlayers(lg._id);
     };
 
-    // ================= LOGOUT =================
     const handleLogout = () => {
         localStorage.removeItem("adminLoggedIn");
         navigate("/");
@@ -136,27 +169,25 @@ function FixedAdmin() {
     return (
         <div className="hero-section admin-container">
 
-            {/* ================= CREATE LEAGUE ================= */}
+            {/* CREATE LEAGUE */}
             <div className="admin-card">
                 <h3>Create League</h3>
 
                 <form onSubmit={handleSubmit}>
-                    <input className="admin-input" name="name" placeholder="League Name" value={league.name} onChange={handleChange} />
-                    <input className="admin-input" name="city" placeholder="Village" value={league.city} onChange={handleChange} />
-                    <input className="admin-input" name="fee" placeholder="Entry Fee" value={league.fee} onChange={handleChange} />
-                    <input className="admin-input" name="limit" placeholder="Player Limit" value={league.limit} onChange={handleChange} />
-                    <input className="admin-input" name="lastDate" type="date" value={league.lastDate} onChange={handleChange} />
-                    <input className="admin-input" name="slug" placeholder="League Code" value={league.slug} onChange={handleChange} />
+                    <input name="name" placeholder="League Name" value={league.name} onChange={handleChange} />
+                    <input name="city" placeholder="Village" value={league.city} onChange={handleChange} />
+                    <input name="fee" placeholder="Entry Fee" value={league.fee} onChange={handleChange} />
+                    <input name="lastDate" type="date" value={league.lastDate} onChange={handleChange} />
+                    <input name="slug" placeholder="League Code" value={league.slug} onChange={handleChange} />
 
                     <input type="file" onChange={handleImageUpload} />
 
-                    <button className="admin-button">Create League</button>
+                    <button>Create League</button>
                 </form>
             </div>
 
-            {/* ================= LEAGUES ================= */}
+            {/* LEAGUES */}
             <div className="players-section">
-
                 <h3>Leagues</h3>
 
                 <div className="league-tabs">
@@ -168,27 +199,24 @@ function FixedAdmin() {
                                 onClick={() => handleSelectLeague(lg)}
                             >
                                 <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                                    {lg.banner && (
-                                        <img
-                                            src={`${BASE_URL}/uploads/${lg.banner}`}
-                                            style={{ width: 28, height: 28, borderRadius: "50%" }}
-                                        />
-                                    )}
+
+                                    {/* ✅ FIXED IMAGE */}
+                                    <img
+                                        src={getImage(lg.banner)}
+                                        onError={(e) => (e.target.src = "/default.png")}
+                                        style={{ width: 28, height: 28, borderRadius: "50%" }}
+                                        alt="league"
+                                    />
+
                                     {lg.name}
                                 </div>
                             </button>
 
-                            <button
-                                className="auction-btn"
-                                onClick={() => navigate(`/auction/${lg._id}`)}
-                            >
+                            <button onClick={() => navigate(`/auction/${lg._id}`)}>
                                 Auction
                             </button>
 
-                            <button
-                                className="delete-league-btn"
-                                onClick={() => handleDeleteLeague(lg._id)}
-                            >
+                            <button onClick={() => handleDeleteLeague(lg._id)}>
                                 ×
                             </button>
 
@@ -196,17 +224,9 @@ function FixedAdmin() {
                     ))}
                 </div>
 
-                {/* ================= PLAYERS ================= */}
+                {/* PLAYERS */}
                 {activeLeague && (
                     <div className="players-table">
-
-                        <div className="table-header">
-                            <span>Photo</span>
-                            <span>Name</span>
-                            <span>Village</span>
-                            <span>Role</span>
-                            <span>Action</span>
-                        </div>
 
                         {players.length === 0 ? (
                             <p>No players</p>
@@ -214,42 +234,31 @@ function FixedAdmin() {
                             players.map((p) => (
                                 <div key={p._id} className="player-row">
 
-                                    <div>
-                                        {p.photo && (
-                                            <img
-                                                className="player-image"
-                                                src={`${BASE_URL}/uploads/${p.photo}`}
-                                            />
-                                        )}
-                                    </div>
+                                    {/* ✅ FIXED IMAGE */}
+                                    <img
+                                        src={getImage(p.photo)}
+                                        onError={(e) => (e.target.src = "/default.png")}
+                                        className="player-image"
+                                        alt="player"
+                                    />
 
                                     <div>{p.name}</div>
                                     <div>{p.village}</div>
                                     <div>{p.role}</div>
 
-                                    <div>
-                                        <button
-                                            className="delete-player-btn"
-                                            onClick={() => handleDeletePlayer(p._id)}
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
+                                    <button onClick={() => handleDeletePlayer(p._id)}>
+                                        Delete
+                                    </button>
 
                                 </div>
                             ))
                         )}
+
                     </div>
                 )}
             </div>
 
-            {/* ================= LOGOUT ================= */}
-            <div className="admin-footer">
-                <button onClick={handleLogout} className="logout-btn">
-                    Logout
-                </button>
-            </div>
-
+            <button onClick={handleLogout}>Logout</button>
         </div>
     );
 }
