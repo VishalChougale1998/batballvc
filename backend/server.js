@@ -24,14 +24,13 @@ cloudinary.config({
     api_secret: process.env.API_SECRET,
 });
 
-// ✅ DEBUG LOG (YOU WANTED THIS)
 console.log("Cloudinary ENV:", {
     name: process.env.CLOUD_NAME,
     key: process.env.API_KEY,
     secret: process.env.API_SECRET ? "OK" : "MISSING",
 });
 
-// STORAGE
+/* ================= STORAGE ================= */
 const storage = new CloudinaryStorage({
     cloudinary,
     params: {
@@ -43,70 +42,25 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage });
 
 /* ================= MIDDLEWARE ================= */
-app.use(cors());
+
+/* 🔥 FIXED CORS (VERY IMPORTANT) */
+app.use(cors({
+    origin: [
+        "https://batballvc-1.onrender.com", // frontend
+        "http://localhost:5174",            // local dev
+        "http://localhost:5173"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /* ================= DB ================= */
-mongoose
-    .connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("MongoDB Connected"))
-    .catch((err) => console.log("Mongo Error:", err));
-
-/* ================= MODELS ================= */
-
-const League = mongoose.model(
-    "League",
-    new mongoose.Schema(
-        {
-            name: String,
-            village: String,
-            slug: String,
-            banner: String,
-            entryFee: Number,
-            lastDate: Date,
-        },
-        { timestamps: true }
-    )
-);
-
-const Player = mongoose.model(
-    "Player",
-    new mongoose.Schema(
-        {
-            name: String,
-            role: String,
-            village: String,
-            mobile: String,
-            leagueId: String,
-            photo: String,
-            tshirtSize: String,
-            pantSize: String,
-            status: { type: String, default: "unsold" },
-            teamId: { type: mongoose.Schema.Types.ObjectId, ref: "Team" },
-            price: Number,
-        },
-        { timestamps: true }
-    )
-);
-
-const Team = mongoose.model(
-    "Team",
-    new mongoose.Schema(
-        {
-            name: String,
-            purse: Number,
-            leagueId: String,
-            players: [
-                {
-                    playerId: { type: mongoose.Schema.Types.ObjectId, ref: "Player" },
-                    price: Number,
-                },
-            ],
-        },
-        { timestamps: true }
-    )
-);
+    .catch(err => console.log("Mongo Error:", err));
 
 /* ================= ROUTES ================= */
 
@@ -117,9 +71,8 @@ app.post("/api/create-league", upload.single("banner"), async (req, res) => {
     try {
         const league = await League.create({
             ...req.body,
-            banner: req.file?.path || "",
+            banner: req.file?.path || ""
         });
-
         res.json(league);
     } catch (err) {
         console.error(err);
@@ -129,26 +82,25 @@ app.post("/api/create-league", upload.single("banner"), async (req, res) => {
 
 /* ---------- GET LEAGUES ---------- */
 app.get("/api/leagues", async (req, res) => {
-    const leagues = await League.find().sort({ createdAt: -1 });
-    res.json(leagues);
+    try {
+        const leagues = await League.find().sort({ createdAt: -1 });
+        res.json(leagues);
+    } catch (err) {
+        res.status(500).json({ msg: err.message });
+    }
 });
 
 /* ---------- REGISTER PLAYER ---------- */
 app.post("/api/register", upload.single("photo"), async (req, res) => {
     try {
-        console.log("Register Body:", req.body);
-
         const player = await Player.create({
             ...req.body,
             leagueId: String(req.body.leagueId),
-            photo: req.file?.path || "",
+            photo: req.file?.path || ""
         });
-
-        console.log("Player saved:", player.name);
-
         res.json(player);
     } catch (err) {
-        console.error("Register Error:", err);
+        console.error(err);
         res.status(500).json({ msg: err.message });
     }
 });
@@ -156,17 +108,11 @@ app.post("/api/register", upload.single("photo"), async (req, res) => {
 /* ---------- GET PLAYERS ---------- */
 app.get("/api/players/:leagueId", async (req, res) => {
     try {
-        const id = String(req.params.leagueId);
-
-        console.log("Fetching players for:", id);
-
-        const players = await Player.find({ leagueId: id });
-
-        console.log("Players found:", players.length);
-
+        const players = await Player.find({
+            leagueId: String(req.params.leagueId)
+        });
         res.json(players);
     } catch (err) {
-        console.error("Player Fetch Error:", err);
         res.status(500).json({ msg: err.message });
     }
 });
@@ -187,11 +133,11 @@ app.post("/api/teams", async (req, res) => {
     res.json(team);
 });
 
-/* ---------- GET TEAMS WITH PLAYERS ---------- */
+/* ---------- GET TEAMS ---------- */
 app.get("/api/teams/with-players/:leagueId", async (req, res) => {
     try {
         const teams = await Team.find({
-            leagueId: String(req.params.leagueId),
+            leagueId: String(req.params.leagueId)
         }).populate("players.playerId");
 
         res.json(teams);
@@ -223,7 +169,6 @@ app.post("/api/teams/add-player", async (req, res) => {
 
         res.json({ success: true });
     } catch (err) {
-        console.error(err);
         res.status(500).json({ msg: "Error selling player" });
     }
 });
@@ -246,14 +191,13 @@ app.post("/api/teams/remove-player", async (req, res) => {
         await player.save();
 
         team.players = team.players.filter(
-            (p) => p.playerId.toString() !== playerId
+            p => p.playerId.toString() !== playerId
         );
 
         await team.save();
 
         res.json({ success: true });
     } catch (err) {
-        console.error(err);
         res.status(500).json({ msg: "Error removing player" });
     }
 });
