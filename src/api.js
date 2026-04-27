@@ -1,7 +1,3 @@
-// const BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_URL;
-// export default BASE_URL;
-
-const BASE_URL =
-    import.meta.env.VITE_API_URL || "http://localhost:5000";
+const BASE_URL = "https://batballvc-backend.onrender.com";
 
 export default BASE_URL;
