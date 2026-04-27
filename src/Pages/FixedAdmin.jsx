@@ -2,17 +2,13 @@ import "./Admin.css";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-// ✅ Vite env (with fallback)
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+// ✅ FIXED: HARD CODE BACKEND (IMPORTANT)
+const BASE_URL = "https://batballvc-backend.onrender.com";
 
-// ✅ Handles Cloudinary + old local uploads + fallback
+// ✅ Image handler
 const getImage = (img) => {
     if (!img) return "/default.png";
-
-    // Cloudinary URL
     if (img.startsWith("http")) return img;
-
-    // Old local upload
     return `${BASE_URL}/uploads/${img}`;
 };
 
@@ -41,7 +37,10 @@ function FixedAdmin() {
         try {
             const res = await fetch(`${BASE_URL}/api/leagues`);
             const data = await res.json();
-            setLeagues(data);
+
+            console.log("ADMIN LEAGUES:", data); // debug
+
+            setLeagues(data || []);
         } catch (err) {
             console.error("Fetch leagues error:", err);
         }
@@ -51,7 +50,7 @@ function FixedAdmin() {
         try {
             const res = await fetch(`${BASE_URL}/api/players/${leagueId}`);
             const data = await res.json();
-            setPlayers(data);
+            setPlayers(data || []);
         } catch (err) {
             console.error("Fetch players error:", err);
         }
@@ -93,16 +92,8 @@ function FixedAdmin() {
                 body: formData,
             });
 
-            const text = await res.text();
-            let data;
-            try {
-                data = JSON.parse(text);
-            } catch {
-                console.error("Not JSON:", text);
-            }
-
             if (!res.ok) {
-                alert(data?.msg || "Failed to create league ❌");
+                alert("Failed to create league ❌");
                 return;
             }
 
@@ -121,7 +112,7 @@ function FixedAdmin() {
             setBannerFile(null);
         } catch (err) {
             console.error(err);
-            alert("Failed to create league ❌");
+            alert("Error creating league ❌");
         }
     };
 
@@ -190,6 +181,8 @@ function FixedAdmin() {
             <div className="players-section">
                 <h3>Leagues</h3>
 
+                {leagues.length === 0 && <p>No leagues found</p>}
+
                 <div className="league-tabs">
                     {leagues.map((lg) => (
                         <div key={lg._id} className="league-tab-wrapper">
@@ -199,15 +192,12 @@ function FixedAdmin() {
                                 onClick={() => handleSelectLeague(lg)}
                             >
                                 <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-
-                                    {/* ✅ FIXED IMAGE */}
                                     <img
                                         src={getImage(lg.banner)}
                                         onError={(e) => (e.target.src = "/default.png")}
                                         style={{ width: 28, height: 28, borderRadius: "50%" }}
                                         alt="league"
                                     />
-
                                     {lg.name}
                                 </div>
                             </button>
@@ -234,7 +224,6 @@ function FixedAdmin() {
                             players.map((p) => (
                                 <div key={p._id} className="player-row">
 
-                                    {/* ✅ FIXED IMAGE */}
                                     <img
                                         src={getImage(p.photo)}
                                         onError={(e) => (e.target.src = "/default.png")}
