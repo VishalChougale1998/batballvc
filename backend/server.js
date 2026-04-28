@@ -373,8 +373,11 @@ import { CloudinaryStorage } from "multer-storage-cloudinary";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-// 🔥 IMPORT ROUTES
+// ✅ IMPORT ROUTES + MODELS
 import leagueRoutes from "./routes/leagueRoutes.js";
+import League from "./models/League.js";
+import Player from "./models/Player.js";
+import Team from "./models/Team.js";
 
 const app = express();
 
@@ -401,63 +404,13 @@ app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* ================= MODELS ================= */
-
-import League from "./models/League.js";
-
-const Player = mongoose.model(
-    "Player",
-    new mongoose.Schema(
-        {
-            name: String,
-            role: String,
-            village: String,
-            mobile: String,
-            leagueId: String,
-            photo: String,
-            tshirtSize: String,
-            pantSize: String,
-            status: { type: String, default: "unsold" },
-            teamId: { type: mongoose.Schema.Types.ObjectId, ref: "Team" },
-            price: Number,
-        },
-        { timestamps: true }
-    )
-);
-
-const Team = mongoose.model(
-    "Team",
-    new mongoose.Schema(
-        {
-            name: String,
-            purse: Number,
-            leagueId: String,
-            players: [
-                {
-                    playerId: { type: mongoose.Schema.Types.ObjectId, ref: "Player" },
-                    price: Number,
-                },
-            ],
-        },
-        { timestamps: true }
-    )
-);
-
-/* ================= RAZORPAY ================= */
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
-
 /* ================= ROUTES ================= */
 
-// HEALTH
 app.get("/", (req, res) => res.send("API running ✅"));
 
-// 🔥 USE LEAGUE ROUTES
 app.use("/api/leagues", leagueRoutes);
 
-// CREATE LEAGUE (file upload)
+/* ---------- CREATE LEAGUE ---------- */
 app.post("/api/create-league", upload.single("banner"), async (req, res) => {
     try {
         const league = await League.create({
@@ -514,6 +467,45 @@ app.post("/api/teams", async (req, res) => {
     }
 });
 
+/* 🔥 ADD PLAYER (THIS WAS MISSING) */
+app.post("/api/teams/add-player", async (req, res) => {
+    try {
+        const { teamId, playerId, price } = req.body;
+
+        const team = await Team.findById(teamId);
+        const player = await Player.findById(playerId);
+
+        if (!team || !player) {
+            return res.status(400).json({ msg: "Invalid data" });
+        }
+
+        if (player.status === "sold") {
+            return res.status(400).json({ msg: "Already sold" });
+        }
+
+        if (team.purse < price) {
+            return res.status(400).json({ msg: "Low purse" });
+        }
+
+        // update player
+        player.status = "sold";
+        player.teamId = teamId;
+        player.price = price;
+        await player.save();
+
+        // update team
+        team.players.push({ playerId, price });
+        team.purse -= price;
+        await team.save();
+
+        res.json({ success: true });
+
+    } catch (err) {
+        res.status(500).json({ msg: "Error selling player" });
+    }
+});
+
+/* ---------- DELETE TEAM ---------- */
 app.delete("/api/teams/:id", async (req, res) => {
     try {
         const teamId = req.params.id;
@@ -531,6 +523,7 @@ app.delete("/api/teams/:id", async (req, res) => {
     }
 });
 
+/* ---------- GET TEAMS ---------- */
 app.get("/api/teams/with-players/:leagueId", async (req, res) => {
     try {
         const teams = await Team.find({
@@ -544,6 +537,11 @@ app.get("/api/teams/with-players/:leagueId", async (req, res) => {
 });
 
 /* ================= PAYMENT ================= */
+
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 app.post("/api/create-order", async (req, res) => {
     try {
