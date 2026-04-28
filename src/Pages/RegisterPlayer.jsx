@@ -270,6 +270,9 @@
 
 // export default RegisterPlayer;
 // =================================
+
+
+
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import BASE_URL from "../api";
@@ -469,7 +472,7 @@ function RegisterPlayer() {
                     <p>Entry Fee: ₹{league.entryFee}</p>
 
                     <img
-                        src={preview || "/default.png"}
+                        src={preview || "/default.jpg"}
                         alt="preview"
                         style={{ width: 120, height: 120 }}
                     />

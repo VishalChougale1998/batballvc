@@ -71,3 +71,4 @@ function LeagueCard({ league = {}, showRegister }) {
 }
 
 export default LeagueCard;
+

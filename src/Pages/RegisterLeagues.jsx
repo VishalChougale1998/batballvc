@@ -27,7 +27,8 @@
 
 // export default RegisterLeagues;
 
-// =====================================
+// =====================
+
 
 import { useEffect, useState } from "react";
 import BASE_URL from "../api";
@@ -37,43 +38,38 @@ function RegisterLeagues() {
     const [leagues, setLeagues] = useState([]);
 
     useEffect(() => {
-        const fetchLeagues = async () => {
-            try {
-                const res = await fetch(`${BASE_URL}/api/leagues`);
-                const data = await res.json();
-
-                console.log("Leagues:", data); // ✅ debug
-
-                setLeagues(Array.isArray(data) ? data : []);
-            } catch (err) {
-                console.error("Error fetching leagues:", err);
-                setLeagues([]);
-            }
-        };
-
-        fetchLeagues();
+        fetch(`${BASE_URL}/api/leagues`)
+            .then(res => res.json())
+            .then(data => setLeagues(data))
+            .catch(err => console.error("Error fetching leagues:", err));
     }, []);
 
     return (
-        <div className="main-container">
-            <h2 className="text-center mb-4">📝 Register Player</h2>
+        <div className="container mt-4">
+            {/* HEADER */}
+            <div className="text-center mb-4">
+                <h2>📝 Register Player</h2>
+                <p className="text-muted">
+                    Select a league to register players
+                </p>
+            </div>
 
-            <div className="leagues-container">
-
-                {leagues.length === 0 && (
-                    <p className="text-center text-muted">
-                        No leagues available
-                    </p>
+            {/* LEAGUES GRID */}
+            <div className="row">
+                {leagues.length > 0 ? (
+                    leagues.map((l) => (
+                        <div key={l._id} className="col-md-4 mb-4">
+                            <LeagueCard
+                                league={l}
+                                showRegister={true}
+                            />
+                        </div>
+                    ))
+                ) : (
+                    <div className="text-center">
+                        <p>No leagues available</p>
+                    </div>
                 )}
-
-                {leagues.map((league) => (
-                    <LeagueCard
-                        key={league._id}
-                        league={league}
-                        showRegister={true}
-                    />
-                ))}
-
             </div>
         </div>
     );
