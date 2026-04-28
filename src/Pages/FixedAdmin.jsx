@@ -207,6 +207,68 @@ function FixedAdmin() {
     };
     console.log("Active League:", activeLeague);
 
+    // =====================exportalldata==========
+    const exportLeaguePlayers = async () => {
+        if (!activeLeague) {
+            alert("Select a league first");
+            return;
+        }
+
+        try {
+            const res = await fetch(
+                `${BASE_URL}/api/players-league/${activeLeague}`
+            );
+
+            if (!res.ok) {
+                alert("API error");
+                return;
+            }
+
+            const data = await res.json();
+
+            console.log("DATA:", data); // 👈 MUST SEE ARRAY HERE
+
+            // ✅ SAFE CHECK
+            if (!data || data.length === 0) {
+                alert("No players found");
+                return;
+            }
+
+            // ✅ CORRECT MAP
+            const formatted = data.map((p) => ({
+                Name: p.name,
+                Village: p.village,
+                Role: p.role,
+                Mobile: p.mobile,
+                Shirt: p.tshirtSize,
+                Pant: p.pantSize,
+                Team: p.teamId?.name || "Unsold",
+                Bid: p.price || 0,
+                Status: p.status,
+                Photo: p.photo || "",
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(formatted);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Players");
+
+            const fileBuffer = XLSX.write(workbook, {
+                bookType: "xlsx",
+                type: "array",
+            });
+
+            const blob = new Blob([fileBuffer], {
+                type: "application/octet-stream",
+            });
+
+            saveAs(blob, "League_Players.xlsx");
+
+        } catch (err) {
+            console.error(err);
+            alert("Export failed");
+        }
+    };
+
     return (
         <div className="hero-section admin-container">
 
