@@ -472,7 +472,7 @@ function RegisterPlayer() {
                     <p>Entry Fee: ₹{league.entryFee}</p>
 
                     <img
-                        src={preview || "/default.jpg"}
+                        src={preview || ""}
                         alt="preview"
                         style={{ width: 120, height: 120 }}
                     />
