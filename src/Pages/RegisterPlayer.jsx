@@ -134,7 +134,7 @@ function RegisterPlayer() {
             const data = await res.json();
 
             const options = {
-                key: "rzp_test_SXN8BWLtjYtAmI",
+                key: "rzp_live_SiqEGrq0TVRyuM",
                 amount: data.amount,
                 currency: "INR",
                 name: "BatBallVc",
