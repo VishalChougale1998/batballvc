@@ -1,10 +1,15 @@
 import mongoose from "mongoose";
 
-const leagueSchema = new mongoose.Schema({
-    name: String,
-    city: String,
-    slug: String,
-    photo: String
-});
+const leagueSchema = new mongoose.Schema(
+    {
+        name: String,
+        village: String,
+        slug: String,
+        banner: String,
+        entryFee: Number,
+        lastDate: Date,
+    },
+    { timestamps: true }
+);
 
-export default mongoose.model("League", leagueSchema);
+export default mongoose.models.League || mongoose.model("League", leagueSchema);

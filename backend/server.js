@@ -373,6 +373,9 @@ import { CloudinaryStorage } from "multer-storage-cloudinary";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
+// 🔥 IMPORT ROUTES
+import leagueRoutes from "./routes/leagueRoutes.js";
+
 const app = express();
 
 /* ================= CLOUDINARY ================= */
@@ -400,20 +403,7 @@ app.use(express.urlencoded({ extended: true }));
 
 /* ================= MODELS ================= */
 
-const League = mongoose.model(
-    "League",
-    new mongoose.Schema(
-        {
-            name: String,
-            village: String,
-            slug: String,
-            banner: String,
-            entryFee: Number,
-            lastDate: Date,
-        },
-        { timestamps: true }
-    )
-);
+import League from "./models/League.js";
 
 const Player = mongoose.model(
     "Player",
@@ -454,7 +444,6 @@ const Team = mongoose.model(
 );
 
 /* ================= RAZORPAY ================= */
-
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -462,9 +451,13 @@ const razorpay = new Razorpay({
 
 /* ================= ROUTES ================= */
 
+// HEALTH
 app.get("/", (req, res) => res.send("API running ✅"));
 
-/* ---------- CREATE LEAGUE ---------- */
+// 🔥 USE LEAGUE ROUTES
+app.use("/api/leagues", leagueRoutes);
+
+// CREATE LEAGUE (file upload)
 app.post("/api/create-league", upload.single("banner"), async (req, res) => {
     try {
         const league = await League.create({
@@ -477,17 +470,7 @@ app.post("/api/create-league", upload.single("banner"), async (req, res) => {
     }
 });
 
-/* ---------- GET LEAGUES ---------- */
-app.get("/api/leagues", async (req, res) => {
-    try {
-        const leagues = await League.find().sort({ createdAt: -1 });
-        res.json(leagues);
-    } catch (err) {
-        res.status(500).json({ msg: err.message });
-    }
-});
-
-/* ---------- REGISTER PLAYER ---------- */
+/* ---------- PLAYERS ---------- */
 app.post("/api/register", upload.single("photo"), async (req, res) => {
     try {
         const player = await Player.create({
@@ -501,7 +484,6 @@ app.post("/api/register", upload.single("photo"), async (req, res) => {
     }
 });
 
-/* ---------- GET PLAYERS ---------- */
 app.get("/api/players/:leagueId", async (req, res) => {
     try {
         const players = await Player.find({
@@ -513,7 +495,6 @@ app.get("/api/players/:leagueId", async (req, res) => {
     }
 });
 
-/* ---------- DELETE PLAYER ---------- */
 app.delete("/api/players/:id", async (req, res) => {
     try {
         await Player.findByIdAndDelete(req.params.id);
@@ -523,7 +504,7 @@ app.delete("/api/players/:id", async (req, res) => {
     }
 });
 
-/* ---------- CREATE TEAM ---------- */
+/* ---------- TEAMS ---------- */
 app.post("/api/teams", async (req, res) => {
     try {
         const team = await Team.create(req.body);
@@ -533,7 +514,6 @@ app.post("/api/teams", async (req, res) => {
     }
 });
 
-/* ---------- DELETE TEAM ---------- */
 app.delete("/api/teams/:id", async (req, res) => {
     try {
         const teamId = req.params.id;
@@ -551,7 +531,6 @@ app.delete("/api/teams/:id", async (req, res) => {
     }
 });
 
-/* ---------- GET TEAMS WITH PLAYERS ---------- */
 app.get("/api/teams/with-players/:leagueId", async (req, res) => {
     try {
         const teams = await Team.find({
@@ -564,87 +543,11 @@ app.get("/api/teams/with-players/:leagueId", async (req, res) => {
     }
 });
 
-/* ---------- ADD PLAYER ---------- */
-app.post("/api/teams/add-player", async (req, res) => {
-    try {
-        const { teamId, playerId, price } = req.body;
-
-        const team = await Team.findById(teamId);
-        const player = await Player.findById(playerId);
-
-        if (!team || !player) return res.status(400).json({ msg: "Invalid data" });
-        if (player.status === "sold")
-            return res.status(400).json({ msg: "Already sold" });
-        if (team.purse < price)
-            return res.status(400).json({ msg: "Low purse" });
-
-        player.status = "sold";
-        player.teamId = teamId;
-        player.price = price;
-        await player.save();
-
-        team.players.push({ playerId, price });
-        team.purse -= price;
-        await team.save();
-
-        res.json({ success: true });
-    } catch {
-        res.status(500).json({ msg: "Error selling player" });
-    }
-});
-
-/* ---------- REMOVE PLAYER ---------- */
-app.post("/api/teams/remove-player", async (req, res) => {
-    try {
-        const { playerId, teamId } = req.body;
-
-        const team = await Team.findById(teamId);
-        const player = await Player.findById(playerId);
-
-        const entry = team.players.find(
-            (p) => p.playerId.toString() === playerId
-        );
-
-        team.purse += entry.price;
-        team.players = team.players.filter(
-            (p) => p.playerId.toString() !== playerId
-        );
-
-        await team.save();
-
-        player.status = "unsold";
-        player.teamId = null;
-        player.price = 0;
-        await player.save();
-
-        res.json({ success: true });
-    } catch {
-        res.status(500).json({ msg: "Error removing player" });
-    }
-});
-
-/* ---------- EXPORT PLAYERS ---------- */
-app.get("/api/players-league/:leagueId", async (req, res) => {
-    try {
-        const players = await Player.find({
-            leagueId: req.params.leagueId,
-        }).populate("teamId", "name");
-
-        res.json(players);
-    } catch (err) {
-        res.status(500).json({ msg: err.message });
-    }
-});
-
 /* ================= PAYMENT ================= */
 
-/* CREATE ORDER */
 app.post("/api/create-order", async (req, res) => {
     try {
         const { amount } = req.body;
-
-        if (!amount)
-            return res.status(400).json({ error: "Amount required" });
 
         const order = await razorpay.orders.create({
             amount: amount * 100,
@@ -653,12 +556,11 @@ app.post("/api/create-order", async (req, res) => {
         });
 
         res.json(order);
-    } catch (err) {
+    } catch {
         res.status(500).json({ error: "Order failed" });
     }
 });
 
-/* VERIFY PAYMENT */
 app.post("/api/verify-payment", (req, res) => {
     const {
         razorpay_order_id,

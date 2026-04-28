@@ -1,78 +1,44 @@
-// import express from "express";
-// import League from "../models/League.js";
-
-// const router = express.Router();
-
-// // CREATE LEAGUE
-// router.post("/", async (req, res) => {
-//     const league = new League(req.body);
-//     const saved = await league.save();
-//     res.json(saved);
-// });
-
-// // GET ALL
-// router.get("/", async (req, res) => {
-//     const leagues = await League.find();
-//     res.json(leagues);
-// });
-
-// export default router;
-// ===========================
-
 import express from "express";
-import League from "../models/League.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
+// SAME SCHEMA (needed here)
+import League from "../models/League.js";
 
-// ==========================
-// CREATE LEAGUE
-// ==========================
+// CREATE
 router.post("/", async (req, res) => {
     try {
         const league = new League(req.body);
         const saved = await league.save();
         res.status(201).json(saved);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 });
 
-
-// ==========================
-// GET ALL LEAGUES
-// ==========================
+// GET ALL
 router.get("/", async (req, res) => {
     try {
         const leagues = await League.find().sort({ createdAt: -1 });
         res.json(leagues);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 });
 
-
-// ==========================
-// GET SINGLE LEAGUE
-// ==========================
+// GET ONE
 router.get("/:id", async (req, res) => {
     try {
         const league = await League.findById(req.params.id);
-
-        if (!league) {
-            return res.status(404).json({ message: "League not found" });
-        }
-
+        if (!league) return res.status(404).json({ message: "Not found" });
         res.json(league);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 });
 
-
-// ==========================
-// UPDATE LEAGUE
-// ==========================
+// UPDATE
 router.put("/:id", async (req, res) => {
     try {
         const updated = await League.findByIdAndUpdate(
@@ -80,34 +46,21 @@ router.put("/:id", async (req, res) => {
             req.body,
             { new: true }
         );
-
-        if (!updated) {
-            return res.status(404).json({ message: "League not found" });
-        }
-
         res.json(updated);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 });
 
-
-// ==========================
-// DELETE LEAGUE  🔥 (YOUR FIX)
-// ==========================
+// DELETE ✅
 router.delete("/:id", async (req, res) => {
     try {
         const deleted = await League.findByIdAndDelete(req.params.id);
-
-        if (!deleted) {
-            return res.status(404).json({ message: "League not found" });
-        }
-
-        res.json({ message: "League deleted successfully" });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+        if (!deleted) return res.status(404).json({ message: "Not found" });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 });
-
 
 export default router;
