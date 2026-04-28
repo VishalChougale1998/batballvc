@@ -658,6 +658,13 @@ function Auction() {
                                     <button onClick={() => setPrice(price + 500)}>+500</button>
                                     <button onClick={() => setPrice(price + 1000)}>+1000</button>
                                 </div>
+                                {/* manualinput */}
+                                <input
+                                    type="number"
+                                    placeholder="Enter manual bid"
+                                    value={price}
+                                    onChange={(e) => setPrice(Number(e.target.value) || 0)}
+                                />
 
                                 <select onChange={(e) => setTeamId(e.target.value)}>
                                     <option value="">Select Team</option>

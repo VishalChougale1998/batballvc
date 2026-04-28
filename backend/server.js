@@ -427,17 +427,30 @@ app.post("/api/teams/add-player", async (req, res) => {
             return res.status(400).json({ msg: "Invalid data" });
         }
 
+        // 🔥 CHECK PURSE BEFORE SELL
+        if (team.purse < price) {
+            return res.status(400).json({
+                msg: "Not enough purse balance ❌",
+            });
+        }
+
+        // 🔥 SELL PLAYER
         player.status = "sold";
         player.teamId = teamId;
         player.price = price;
         await player.save();
 
         team.players.push({ playerId, price });
+
+        // 🔥 SAFE DEDUCT
         team.purse -= price;
+
         await team.save();
 
         res.json({ success: true });
-    } catch {
+
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ msg: "Error selling player" });
     }
 });
@@ -454,19 +467,36 @@ app.post("/api/teams/remove-player", async (req, res) => {
             return res.status(400).json({ msg: "Invalid data" });
         }
 
-        player.status = "unsold";
-        player.teamId = null;
-        player.price = 0;
-        await player.save();
+        // 🔥 Find player inside team
+        const playerEntry = team.players.find(
+            (p) => p.playerId.toString() === playerId
+        );
 
+        if (!playerEntry) {
+            return res.status(400).json({ msg: "Player not in team" });
+        }
+
+        // 🔥 Refund purse
+        team.purse += playerEntry.price;
+
+        // 🔥 Remove from team
         team.players = team.players.filter(
             (p) => p.playerId.toString() !== playerId
         );
 
         await team.save();
 
+        // 🔥 Reset player AFTER refund
+        player.status = "unsold";
+        player.teamId = null;
+        player.price = 0;
+
+        await player.save();
+
         res.json({ success: true });
-    } catch {
+
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ msg: "Error removing player" });
     }
 });
