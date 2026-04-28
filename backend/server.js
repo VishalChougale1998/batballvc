@@ -283,4 +283,17 @@ const startServer = async () => {
     }
 };
 
+// alldataexport==================
+app.get("/api/players-league/:leagueId", async (req, res) => {
+    try {
+        const players = await Player.find({
+            leagueId: req.params.leagueId
+        }).populate("teamId", "name");
+
+        res.json(players);
+    } catch (err) {
+        res.status(500).json({ msg: err.message });
+    }
+});
+
 startServer();

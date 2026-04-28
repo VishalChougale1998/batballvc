@@ -156,6 +156,55 @@ function FixedAdmin() {
         localStorage.removeItem("adminLoggedIn");
         navigate("/");
     };
+    // alldataexport =======================
+    const exportLeaguePlayers = async () => {
+        if (!activeLeague) {
+            alert("Select a league first");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${BASE_URL}/api/players-league/${activeLeague}`);
+            const data = await res.json();
+
+            if (!data.length) {
+                alert("No players found");
+                return;
+            }
+
+            const formatted = data.map((p) => ({
+                Name: p.name,
+                Village: p.village,
+                Role: p.role,
+                Mobile: p.mobile,
+                Shirt: p.tshirtSize,
+                Pant: p.pantSize,
+                Team: p.teamId?.name || "Unsold",
+                Bid: p.price || 0,
+                Status: p.status,
+                Photo: p.photo || "",
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(formatted);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Players");
+
+            const fileBuffer = XLSX.write(workbook, {
+                bookType: "xlsx",
+                type: "array",
+            });
+
+            const blob = new Blob([fileBuffer], {
+                type: "application/octet-stream",
+            });
+
+            saveAs(blob, "League_Players.xlsx");
+
+        } catch (err) {
+            console.error(err);
+            alert("Export failed");
+        }
+    };
 
     return (
         <div className="hero-section admin-container">
@@ -213,7 +262,12 @@ function FixedAdmin() {
                         </div>
                     ))}
                 </div>
-
+                {/* ===========================
+                 */}
+                <button onClick={exportLeaguePlayers} className="create-btn">
+                    Export League Players
+                </button>
+                {/* ======================== */}
                 {/* PLAYERS */}
                 {activeLeague && (
                     <div className="players-table">
