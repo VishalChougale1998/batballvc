@@ -625,7 +625,7 @@ function Auction() {
                                         <button onClick={() =>
                                             unsoldPlayer(p.playerId?._id, selectedTeam?._id)
                                         }>
-                                            Remove
+                                            Unsold
                                         </button>
                                     </div>
                                 ))}
