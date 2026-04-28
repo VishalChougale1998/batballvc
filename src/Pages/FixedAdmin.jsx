@@ -205,6 +205,7 @@ function FixedAdmin() {
             alert("Export failed");
         }
     };
+    console.log("Active League:", activeLeague);
 
     return (
         <div className="hero-section admin-container">
