@@ -659,6 +659,8 @@ function Auction() {
                                     <button onClick={() => setPrice(price + 1000)}>+1000</button>
                                 </div>
                                 {/* manualinput */}
+
+
                                 <input
                                     type="number"
                                     placeholder="Enter manual bid"
