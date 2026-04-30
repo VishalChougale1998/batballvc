@@ -5,10 +5,8 @@ import { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-// ✅ FIXED: HARD CODE BACKEND (IMPORTANT)
 const BASE_URL = "https://batballvc-backend.onrender.com";
 
-// ✅ Image handler
 const getImage = (img) => {
     if (!img) return "/default.png";
     if (img.startsWith("http")) return img;
@@ -31,7 +29,6 @@ function FixedAdmin() {
         slug: "",
     });
 
-    // ================= FETCH =================
     useEffect(() => {
         fetchLeagues();
     }, []);
@@ -40,26 +37,37 @@ function FixedAdmin() {
         try {
             const res = await fetch(`${BASE_URL}/api/leagues`);
             const data = await res.json();
-
-            console.log("ADMIN LEAGUES:", data); // debug
-
             setLeagues(data || []);
         } catch (err) {
             console.error("Fetch leagues error:", err);
         }
     };
 
+    // ✅ FIXED
     const fetchPlayers = async (leagueId) => {
+        if (!leagueId) {
+            console.error("❌ Invalid leagueId:", leagueId);
+            return;
+        }
+
         try {
-            const res = await fetch(`${BASE_URL}/api/players/${leagueId}`);
+            console.log("Fetching players for:", leagueId);
+
+            const res = await fetch(`${BASE_URL}/api/players-all/${leagueId}`);
+
+            if (!res.ok) {
+                throw new Error("API failed");
+            }
+
             const data = await res.json();
-            setPlayers(data || []);
+
+            setPlayers(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error("Fetch players error:", err);
+            setPlayers([]);
         }
     };
 
-    // ================= INPUT =================
     const handleChange = (e) => {
         setLeague({
             ...league,
@@ -71,7 +79,6 @@ function FixedAdmin() {
         setBannerFile(e.target.files[0]);
     };
 
-    // ================= CREATE LEAGUE =================
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -81,10 +88,10 @@ function FixedAdmin() {
             const formData = new FormData();
 
             formData.append("name", league.name);
-            formData.append("village", league.city);
-            formData.append("entryFee", league.fee);
-            formData.append("lastDate", league.lastDate);
-            formData.append("slug", league.slug);
+            formData.append("village", league.city || "");
+            formData.append("entryFee", league.fee || 0);
+            formData.append("lastDate", league.lastDate || "");
+            formData.append("slug", league.slug || "");
 
             if (bannerFile) {
                 formData.append("banner", bannerFile);
@@ -95,13 +102,15 @@ function FixedAdmin() {
                 body: formData,
             });
 
+            const data = await res.json();
+
             if (!res.ok) {
-                alert("Failed to create league ❌");
+                console.error("SERVER ERROR:", data);
+                alert(data.msg || "Failed to create league ❌");
                 return;
             }
 
             alert("League Created ✅");
-
             fetchLeagues();
 
             setLeague({
@@ -113,13 +122,13 @@ function FixedAdmin() {
             });
 
             setBannerFile(null);
+
         } catch (err) {
-            console.error(err);
+            console.error("CREATE ERROR:", err);
             alert("Error creating league ❌");
         }
     };
 
-    // ================= DELETE =================
     const handleDeleteLeague = async (id) => {
         if (!window.confirm("Delete this league?")) return;
 
@@ -149,7 +158,6 @@ function FixedAdmin() {
         }
     };
 
-    // ================= SELECT =================
     const handleSelectLeague = (lg) => {
         setActiveLeague(lg._id);
         fetchPlayers(lg._id);
@@ -160,9 +168,7 @@ function FixedAdmin() {
         navigate("/");
     };
 
-    console.log("Active League:", activeLeague);
-
-    // =====================exportalldata==========
+    // ✅ FIXED EXPORT API
     const exportLeaguePlayers = async () => {
         if (!activeLeague) {
             alert("Select a league first");
@@ -171,7 +177,7 @@ function FixedAdmin() {
 
         try {
             const res = await fetch(
-                `${BASE_URL}/api/players-league/${activeLeague}`
+                `${BASE_URL}/api/players-all/${activeLeague}`
             );
 
             if (!res.ok) {
@@ -181,15 +187,11 @@ function FixedAdmin() {
 
             const data = await res.json();
 
-            console.log("DATA:", data); // 👈 MUST SEE ARRAY HERE
-
-            // ✅ SAFE CHECK
             if (!data || data.length === 0) {
                 alert("No players found");
                 return;
             }
 
-            // ✅ CORRECT MAP
             const formatted = data.map((p) => ({
                 Name: p.name,
                 Village: p.village,
@@ -227,7 +229,6 @@ function FixedAdmin() {
     return (
         <div className="hero-section admin-container">
 
-            {/* CREATE LEAGUE */}
             <div className="admin-card">
                 <h3>Create League</h3>
 
@@ -244,7 +245,6 @@ function FixedAdmin() {
                 </form>
             </div>
 
-            {/* LEAGUES */}
             <div className="players-section">
                 <h3>Leagues</h3>
 
@@ -280,13 +280,11 @@ function FixedAdmin() {
                         </div>
                     ))}
                 </div>
-                {/* ===========================
-                 */}
+
                 <button onClick={exportLeaguePlayers} className="create-btn">
                     Export League Players
                 </button>
-                {/* ======================== */}
-                {/* PLAYERS */}
+
                 {activeLeague && (
                     <div className="players-table">
 

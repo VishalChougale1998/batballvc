@@ -114,14 +114,29 @@ function Auction() {
         loadData();
     };
 
-    const unsoldPlayer = async (playerId, teamId) => {
-        await fetch(`${BASE_URL}/api/teams/remove-player`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ playerId, teamId })
-        });
+    const unsoldPlayer = async (playerId) => {
+        try {
+            const res = await fetch(`${BASE_URL}/api/players/unsold`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ playerId })
+            });
 
-        loadData();
+            const data = await res.json();
+
+            if (!res.ok) {
+                console.error("Unsold failed:", data);
+                alert("Unsold failed ❌");
+                return;
+            }
+
+            console.log("Unsold success:", data);
+
+            loadData(); // refresh UI
+
+        } catch (err) {
+            console.error("Unsold error:", err);
+        }
     };
     // ===================== pdf ===========
     const exportPDF = async () => {
@@ -234,27 +249,25 @@ function Auction() {
                         <p>No players found ❌</p>
                     )}
 
-                    {players
-                        .filter(p => p.status !== "sold")
-                        .map(p => (
-                            <div key={p._id}
-                                className="player-row"
-                                onClick={() => {
-                                    setCurrentPlayer(p);
-                                    setSelectedTeam(null);
-                                }}>
+                    {players.map(p => (
+                        <div key={p._id}
+                            className="player-row"
+                            onClick={() => {
+                                setCurrentPlayer(p);
+                                setSelectedTeam(null);
+                            }}>
 
-                                <img
-                                    src={getImg(p.photo)}
-                                    onError={(e) => {
-                                        e.target.src = `${window.location.origin}/default.jpg`;
-                                    }}
-                                    alt=""
-                                />
+                            <img
+                                src={getImg(p.photo)}
+                                onError={(e) => {
+                                    e.target.src = `${window.location.origin}/default.jpg`;
+                                }}
+                                alt=""
+                            />
 
-                                <div>{p.name}</div>
-                            </div>
-                        ))}
+                            <div>{p.name}</div>
+                        </div>
+                    ))}
                 </div>
 
                 {/* RIGHT SIDE */}
@@ -295,7 +308,7 @@ function Auction() {
                                         <p>₹{Number(p.price || 0).toLocaleString()}</p>
 
                                         <button onClick={() =>
-                                            unsoldPlayer(p.playerId?._id, selectedTeam?._id)
+                                            unsoldPlayer(p.playerId?._id)
                                         }>
                                             Unsold
                                         </button>

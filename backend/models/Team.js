@@ -1,27 +1,42 @@
 import mongoose from "mongoose";
 
-const TeamSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    purse: { type: Number, default: 50000 },
+const teamSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: true,
+            trim: true
+        },
 
-    leagueId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "League",
-        required: true
-    },
+        purse: {
+            type: Number,
+            default: 50000,
+            min: 0
+        },
 
-    players: [
-        {
-            playerId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Player"
-            },
-            price: {
-                type: Number,
-                required: true
+        leagueId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "League",
+            required: true
+        },
+
+        players: [
+            {
+                playerId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "Player",
+                    required: true
+                },
+                price: {
+                    type: Number,
+                    required: true,
+                    min: 0
+                }
             }
-        }
-    ]
-}, { timestamps: true });
+        ]
+    },
+    { timestamps: true }
+);
 
-export default mongoose.models.Team || mongoose.model("Team", TeamSchema);
+// ✅ Prevent overwrite error
+export default mongoose.models.Team || mongoose.model("Team", teamSchema);

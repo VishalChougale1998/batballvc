@@ -373,11 +373,10 @@ import { CloudinaryStorage } from "multer-storage-cloudinary";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-// ✅ IMPORT ROUTES + MODELS
-import leagueRoutes from "./routes/leagueRoutes.js";
 import League from "./models/League.js";
 import Player from "./models/Player.js";
 import Team from "./models/Team.js";
+import leagueRoutes from "./routes/leagueRoutes.js";
 
 const app = express();
 
@@ -396,7 +395,6 @@ const storage = new CloudinaryStorage({
         allowed_formats: ["jpg", "jpeg", "png"],
     },
 });
-
 const upload = multer({ storage });
 
 /* ================= MIDDLEWARE ================= */
@@ -407,67 +405,109 @@ app.use(express.urlencoded({ extended: true }));
 /* ================= ROUTES ================= */
 
 app.get("/", (req, res) => res.send("API running ✅"));
-
 app.use("/api/leagues", leagueRoutes);
 
 /* ---------- CREATE LEAGUE ---------- */
 app.post("/api/create-league", upload.single("banner"), async (req, res) => {
     try {
+        const { name, village, entryFee, lastDate } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ msg: "Name is required" });
+        }
+
         const league = await League.create({
-            ...req.body,
-            banner: req.file?.path || "",
+            name,
+            village,
+            entryFee: Number(entryFee || 0),
+            lastDate: lastDate ? new Date(lastDate) : null,
+            banner: req.file?.path || ""
         });
+
         res.json(league);
+
     } catch (err) {
+        console.error("CREATE LEAGUE ERROR:", err);
         res.status(500).json({ msg: err.message });
     }
 });
 
-/* ---------- PLAYERS ---------- */
+/* ---------- REGISTER PLAYER ---------- */
 app.post("/api/register", upload.single("photo"), async (req, res) => {
     try {
         const player = await Player.create({
             ...req.body,
-            leagueId: String(req.body.leagueId),
+            leagueId: new mongoose.Types.ObjectId(req.body.leagueId),
             photo: req.file?.path || "",
         });
+
         res.json(player);
+
     } catch (err) {
+        console.error("REGISTER PLAYER ERROR:", err);
         res.status(500).json({ msg: err.message });
     }
 });
 
+/* ---------- GET UNSOLD PLAYERS ---------- */
 app.get("/api/players/:leagueId", async (req, res) => {
     try {
         const players = await Player.find({
-            leagueId: String(req.params.leagueId),
+            leagueId: new mongoose.Types.ObjectId(req.params.leagueId),
+            status: "unsold"
         });
+
         res.json(players);
+
     } catch (err) {
+        console.error("GET PLAYERS ERROR:", err);
         res.status(500).json({ msg: err.message });
     }
 });
 
+/* ---------- GET ALL PLAYERS ---------- */
+app.get("/api/players-all/:leagueId", async (req, res) => {
+    try {
+        const players = await Player.find({
+            leagueId: new mongoose.Types.ObjectId(req.params.leagueId)
+        });
+
+        res.json(players);
+
+    } catch (err) {
+        console.error("GET ALL PLAYERS ERROR:", err);
+        res.status(500).json({ msg: err.message });
+    }
+});
+
+/* ---------- DELETE PLAYER ---------- */
 app.delete("/api/players/:id", async (req, res) => {
     try {
         await Player.findByIdAndDelete(req.params.id);
         res.json({ success: true });
-    } catch {
+
+    } catch (err) {
         res.status(500).json({ success: false });
     }
 });
 
-/* ---------- TEAMS ---------- */
+/* ---------- CREATE TEAM ---------- */
 app.post("/api/teams", async (req, res) => {
     try {
-        const team = await Team.create(req.body);
+        const team = await Team.create({
+            ...req.body,
+            leagueId: new mongoose.Types.ObjectId(req.body.leagueId)
+        });
+
         res.json(team);
+
     } catch (err) {
+        console.error("CREATE TEAM ERROR:", err);
         res.status(500).json({ msg: err.message });
     }
 });
 
-/* 🔥 ADD PLAYER (THIS WAS MISSING) */
+/* ---------- ADD PLAYER TO TEAM ---------- */
 app.post("/api/teams/add-player", async (req, res) => {
     try {
         const { teamId, playerId, price } = req.body;
@@ -476,24 +516,22 @@ app.post("/api/teams/add-player", async (req, res) => {
         const player = await Player.findById(playerId);
 
         if (!team || !player) {
-            return res.status(400).json({ msg: "Invalid data" });
+            return res.status(400).json({ msg: "Invalid team/player" });
         }
 
         if (player.status === "sold") {
-            return res.status(400).json({ msg: "Already sold" });
+            return res.status(400).json({ msg: "Player already sold" });
         }
 
         if (team.purse < price) {
-            return res.status(400).json({ msg: "Low purse" });
+            return res.status(400).json({ msg: "Not enough purse" });
         }
 
-        // update player
         player.status = "sold";
         player.teamId = teamId;
         player.price = price;
         await player.save();
 
-        // update team
         team.players.push({ playerId, price });
         team.purse -= price;
         await team.save();
@@ -501,7 +539,65 @@ app.post("/api/teams/add-player", async (req, res) => {
         res.json({ success: true });
 
     } catch (err) {
-        res.status(500).json({ msg: "Error selling player" });
+        console.error("ADD PLAYER ERROR:", err);
+        res.status(500).json({ msg: err.message });
+    }
+});
+
+/* ================== 🔥 FIX 1: EXPORT API ================== */
+app.get("/api/players-league/:leagueId", async (req, res) => {
+    try {
+        const players = await Player.find({
+            leagueId: new mongoose.Types.ObjectId(req.params.leagueId)
+        }).populate("teamId");
+
+        res.json(players);
+
+    } catch (err) {
+        console.error("EXPORT PLAYERS ERROR:", err);
+        res.status(500).json({ msg: err.message });
+    }
+});
+
+/* ================== 🔥 FIX 2: UNSOLD PLAYER ================== */
+app.post("/api/players/unsold", async (req, res) => {
+    try {
+        const { playerId } = req.body;
+
+        const player = await Player.findById(playerId);
+        if (!player) {
+            return res.status(404).json({ msg: "Player not found" });
+        }
+
+        const teamId = player.teamId;
+        const price = player.price;
+
+        // update player
+        player.status = "unsold";
+        player.teamId = null;
+        player.price = 0;
+        await player.save();
+
+        // update team
+        if (teamId) {
+            const team = await Team.findById(teamId);
+
+            if (team) {
+                team.players = team.players.filter(
+                    (p) => p.playerId.toString() !== playerId
+                );
+
+                team.purse += price;
+
+                await team.save();
+            }
+        }
+
+        res.json({ success: true });
+
+    } catch (err) {
+        console.error("UNSOLD ERROR:", err);
+        res.status(500).json({ msg: err.message });
     }
 });
 
@@ -518,7 +614,9 @@ app.delete("/api/teams/:id", async (req, res) => {
         await Team.findByIdAndDelete(teamId);
 
         res.json({ success: true });
+
     } catch (err) {
+        console.error("DELETE TEAM ERROR:", err);
         res.status(500).json({ msg: "Error deleting team" });
     }
 });
@@ -527,11 +625,13 @@ app.delete("/api/teams/:id", async (req, res) => {
 app.get("/api/teams/with-players/:leagueId", async (req, res) => {
     try {
         const teams = await Team.find({
-            leagueId: String(req.params.leagueId),
+            leagueId: new mongoose.Types.ObjectId(req.params.leagueId)
         }).populate("players.playerId");
 
         res.json(teams);
+
     } catch (err) {
+        console.error("GET TEAMS ERROR:", err);
         res.status(500).json({ msg: err.message });
     }
 });
@@ -550,11 +650,11 @@ app.post("/api/create-order", async (req, res) => {
         const order = await razorpay.orders.create({
             amount: amount * 100,
             currency: "INR",
-            receipt: "order_" + Date.now(),
         });
 
         res.json(order);
-    } catch {
+
+    } catch (err) {
         res.status(500).json({ error: "Order failed" });
     }
 });
