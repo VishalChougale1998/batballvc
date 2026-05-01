@@ -468,7 +468,7 @@ function RegisterPlayer() {
 
                     <h2>🏏 Player Registration</h2>
                     <h4>{league.name}</h4>
-
+                    <h3>Payment झाल्यानंतर Download Receipt येईपर्यंत थोडा वेळ प्रतीक्षा करा. तरच Registration Complete होईल.</h3>
                     <p>Entry Fee: ₹{league.entryFee}</p>
 
                     <img
