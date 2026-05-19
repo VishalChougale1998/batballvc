@@ -358,3 +358,11 @@
     width: 80%;
   }
 }
+
+.ytlive-container {
+  display: flex;
+  /* flex-direction: column; */
+  flex-direction: row;
+  gap: 20px;
+  align-items: center;
+}

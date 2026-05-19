@@ -470,7 +470,6 @@ function RegisterPlayer() {
                     <h4>{league.name}</h4>
                     <h3>Payment झाल्यानंतर Download Receipt येईपर्यंत थोडा वेळ प्रतीक्षा करा. तरच Registration Complete होईल.</h3>
                     <p>Entry Fee: ₹{league.entryFee}</p>
-
                     <img
                         src={preview || "/default.jpg"}
                         alt="preview"
@@ -490,7 +489,8 @@ function RegisterPlayer() {
 
                     <input name="tshirtSize" placeholder="T-Shirt Size" onChange={handleChange} />
                     <input name="pantSize" placeholder="Pant Size" onChange={handleChange} />
-
+                    <br />
+                    <h3>Player Photo</h3>
                     <input type="file" onChange={handlePhotoChange} />
 
                     <button onClick={handlePayment}>Pay & Register</button>
