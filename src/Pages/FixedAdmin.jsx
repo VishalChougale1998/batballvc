@@ -170,12 +170,14 @@ function FixedAdmin() {
 
     // ✅ FIXED EXPORT API
     const exportLeaguePlayers = async () => {
+
         if (!activeLeague) {
             alert("Select a league first");
             return;
         }
 
         try {
+
             const res = await fetch(
                 `${BASE_URL}/api/players-all/${activeLeague}`
             );
@@ -187,42 +189,83 @@ function FixedAdmin() {
 
             const data = await res.json();
 
-            if (!data || data.length === 0) {
+            if (!Array.isArray(data) || data.length === 0) {
                 alert("No players found");
                 return;
             }
 
+            // ✅ FORMAT DATA
             const formatted = data.map((p) => ({
-                Name: p.name,
-                Village: p.village,
-                Role: p.role,
-                Mobile: p.mobile,
-                Shirt: p.tshirtSize,
-                Pant: p.pantSize,
+
+                Name: p.name || "",
+
+                Village: p.village || "",
+
+                Role: p.role || "",
+
+                Mobile: p.mobile || "",
+
+                TShirtSize: p.tshirtSize || "",
+
+                PantSize: p.pantSize || "",
+
                 Team: p.teamId?.name || "Unsold",
-                Bid: p.price || 0,
-                Status: p.status,
+
+                Bid: Number(p.price || 0),
+
+                Status: p.status || "unsold",
+
                 Photo: p.photo || "",
+
             }));
 
+            // ✅ CREATE SHEET
             const worksheet = XLSX.utils.json_to_sheet(formatted);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Players");
 
+            // ✅ AUTO COLUMN WIDTH
+            worksheet["!cols"] = [
+                { wch: 25 }, // Name
+                { wch: 20 }, // Village
+                { wch: 18 }, // Role
+                { wch: 18 }, // Mobile
+                { wch: 15 }, // TShirt
+                { wch: 15 }, // Pant
+                { wch: 20 }, // Team
+                { wch: 12 }, // Bid
+                { wch: 15 }, // Status
+                { wch: 50 }, // Photo
+            ];
+
+            // ✅ WORKBOOK
+            const workbook = XLSX.utils.book_new();
+
+            XLSX.utils.book_append_sheet(
+                workbook,
+                worksheet,
+                "Players"
+            );
+
+            // ✅ EXPORT
             const fileBuffer = XLSX.write(workbook, {
                 bookType: "xlsx",
                 type: "array",
             });
 
-            const blob = new Blob([fileBuffer], {
-                type: "application/octet-stream",
-            });
+            const blob = new Blob(
+                [fileBuffer],
+                {
+                    type:
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                }
+            );
 
-            saveAs(blob, "League_Players.xlsx");
+            saveAs(blob, `${activeLeague}_Players.xlsx`);
 
         } catch (err) {
-            console.error(err);
-            alert("Export failed");
+
+            console.error("Export Error:", err);
+
+            alert("Export failed ❌");
         }
     };
 
