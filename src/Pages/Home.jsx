@@ -63,7 +63,7 @@ function Home() {
 
                 </div>
                 {/* ...................... */}
-                <div className="video-container">
+                {/* <div className="video-container">
                     <iframe
                         src="https://www.youtube.com/embed/bmklhx9bgX4?si=PWDKwg4yV-OTIvqE"
                         title="YouTube video player"
@@ -72,7 +72,7 @@ function Home() {
                         referrerPolicy="strict-origin-when-cross-origin"
                         allowFullScreen
                     />
-                </div>
+                </div> */}
 
                 {/* ............................ */}
             </div>

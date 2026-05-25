@@ -361,10 +361,6 @@ function FixedAdmin() {
                                 Auction
                             </button>
 
-                            <button onClick={() => handleDeleteLeague(lg._id)}>
-                                ×
-                            </button>
-                            {/* ========== */}
                             <button
                                 onClick={() => editLeague(lg)}
                                 style={{
@@ -379,7 +375,11 @@ function FixedAdmin() {
                             >
                                 Edit Date
                             </button>
-                            {/* ================= */}
+
+                            <button onClick={() => handleDeleteLeague(lg._id)}>
+                                ×
+                            </button>
+
 
                         </div>
                     ))}
