@@ -481,13 +481,38 @@ app.get("/api/players-all/:leagueId", async (req, res) => {
 });
 
 /* ---------- DELETE PLAYER ---------- */
-app.delete("/api/players/:id", async (req, res) => {
+app.delete("/api/leagues/:id", async (req, res) => {
+
     try {
-        await Player.findByIdAndDelete(req.params.id);
-        res.json({ success: true });
+
+        const leagueId = req.params.id;
+
+        // ✅ DELETE ALL PLAYERS
+        await Player.deleteMany({
+            leagueId: String(leagueId),
+        });
+
+        // ✅ DELETE ALL TEAMS
+        await Team.deleteMany({
+            leagueId: String(leagueId),
+        });
+
+        // ✅ DELETE LEAGUE
+        await League.findByIdAndDelete(leagueId);
+
+        res.json({
+            success: true,
+            msg: "League deleted successfully",
+        });
 
     } catch (err) {
-        res.status(500).json({ success: false });
+
+        console.error(err);
+
+        res.status(500).json({
+            success: false,
+            msg: "Delete failed",
+        });
     }
 });
 

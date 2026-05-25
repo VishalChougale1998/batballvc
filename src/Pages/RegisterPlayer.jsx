@@ -443,42 +443,123 @@ function RegisterPlayer() {
     }, [preview]);
 
     // ================= SAVE PLAYER =================
+    // const handleSubmit = async () => {
+
+    //     try {
+
+    //         const formDataToSend = new FormData();
+
+    //         formDataToSend.append("name", formData.name);
+    //         formDataToSend.append("role", formData.role);
+    //         formDataToSend.append("village", formData.village);
+
+    //         // IMPORTANT
+    //         formDataToSend.append(
+    //             "mobile",
+    //             formData.phone
+    //         );
+
+    //         formDataToSend.append(
+    //             "leagueId",
+    //             leagueId
+    //         );
+
+    //         formDataToSend.append(
+    //             "tshirtSize",
+    //             formData.tshirtSize
+    //         );
+
+    //         formDataToSend.append(
+    //             "pantSize",
+    //             formData.pantSize
+    //         );
+
+    //         if (photo) {
+    //             formDataToSend.append("photo", photo);
+    //         }
+
+    //         const saveRes = await fetch(
+    //             `${BASE_URL}/api/register`,
+    //             {
+    //                 method: "POST",
+    //                 body: formDataToSend,
+    //             }
+    //         );
+
+    //         const saveData = await saveRes.json();
+
+    //         if (!saveRes.ok) {
+    //             throw new Error(
+    //                 saveData.msg || "Registration failed"
+    //             );
+    //         }
+
+    //         setShowReceipt(true);
+
+    //     } catch (err) {
+
+    //         console.error(err);
+
+    //         throw err;
+    //     }
+    // };
+
     const handleSubmit = async () => {
 
         try {
 
             const formDataToSend = new FormData();
 
-            formDataToSend.append("name", formData.name);
-            formDataToSend.append("role", formData.role);
-            formDataToSend.append("village", formData.village);
-
-            // IMPORTANT
+            // ✅ BASIC INFO
             formDataToSend.append(
-                "mobile",
-                formData.phone
+                "name",
+                formData.name || ""
             );
 
+            formDataToSend.append(
+                "village",
+                formData.village || ""
+            );
+
+            formDataToSend.append(
+                "role",
+                formData.role || ""
+            );
+
+            // ✅ IMPORTANT FIX
+            formDataToSend.append(
+                "mobile",
+                formData.phone || ""
+            );
+
+            // ✅ IMPORTANT FIX
+            formDataToSend.append(
+                "tshirtSize",
+                formData.tshirtSize || ""
+            );
+
+            // ✅ IMPORTANT FIX
+            formDataToSend.append(
+                "pantSize",
+                formData.pantSize || ""
+            );
+
+            // ✅ LEAGUE
             formDataToSend.append(
                 "leagueId",
                 leagueId
             );
 
-            formDataToSend.append(
-                "tshirtSize",
-                formData.tshirtSize
-            );
-
-            formDataToSend.append(
-                "pantSize",
-                formData.pantSize
-            );
-
+            // ✅ PHOTO
             if (photo) {
-                formDataToSend.append("photo", photo);
+                formDataToSend.append(
+                    "photo",
+                    photo
+                );
             }
 
-            const saveRes = await fetch(
+            // ✅ API CALL
+            const res = await fetch(
                 `${BASE_URL}/api/register`,
                 {
                     method: "POST",
@@ -486,12 +567,15 @@ function RegisterPlayer() {
                 }
             );
 
-            const saveData = await saveRes.json();
+            const data = await res.json();
 
-            if (!saveRes.ok) {
-                throw new Error(
-                    saveData.msg || "Registration failed"
-                );
+            console.log("Saved Player:", data);
+
+            if (!res.ok) {
+
+                alert("Registration failed ❌");
+
+                return;
             }
 
             setShowReceipt(true);
@@ -500,10 +584,9 @@ function RegisterPlayer() {
 
             console.error(err);
 
-            throw err;
+            alert("Registration failed ❌");
         }
     };
-
     // ================= PAYMENT =================
     const handlePayment = async (e) => {
 
