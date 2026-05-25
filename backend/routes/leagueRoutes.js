@@ -40,16 +40,29 @@ router.get("/:id", async (req, res) => {
 });
 
 // UPDATE
+// UPDATE LEAGUE DATE
 router.put("/:id", async (req, res) => {
 
     try {
 
+        const { lastDate } = req.body;
+
+        // check valid id
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({
+                msg: "Invalid League ID",
+            });
+        }
+
+        // update
         const updatedLeague = await League.findByIdAndUpdate(
             req.params.id,
             {
-                lastDate: req.body.lastDate,
+                lastDate: new Date(lastDate),
             },
-            { new: true }
+            {
+                new: true,
+            }
         );
 
         if (!updatedLeague) {
