@@ -934,6 +934,7 @@ function RegisterPlayer() {
                         className="input-field"
                         name="name"
                         placeholder="Name"
+                        value={formData.name}
                         onChange={handleChange}
                         required
                     />
@@ -943,6 +944,7 @@ function RegisterPlayer() {
                         className="input-field"
                         name="village"
                         placeholder="Village"
+                        value={formData.village}
                         onChange={handleChange}
                         required
                     />
@@ -952,6 +954,7 @@ function RegisterPlayer() {
                         className="input-field"
                         name="phone"
                         placeholder="Mobile Number"
+                        value={formData.phone}
                         onChange={handleChange}
                         maxLength={10}
                         required
@@ -961,6 +964,7 @@ function RegisterPlayer() {
                     <select
                         className="input-field"
                         name="role"
+                        value={formData.role}
                         onChange={handleChange}
                         required
                     >
@@ -987,6 +991,7 @@ function RegisterPlayer() {
                         className="input-field"
                         name="tshirtSize"
                         placeholder="T-Shirt Size"
+                        value={formData.tshirtSize}
                         onChange={handleChange}
                         required
                     />
@@ -996,10 +1001,10 @@ function RegisterPlayer() {
                         className="input-field"
                         name="pantSize"
                         placeholder="Pant Size"
+                        value={formData.pantSize}
                         onChange={handleChange}
                         required
                     />
-
                     {/* PHOTO */}
                     <input
                         type="file"
