@@ -1,6 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
-import League from "../models/League.js";
+// import League from "../models/League.js";
 
 const router = express.Router();
 
