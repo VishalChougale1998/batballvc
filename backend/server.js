@@ -361,6 +361,7 @@
 // startServer();
 
 // =============================
+
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -434,18 +435,38 @@ app.post("/api/create-league", upload.single("banner"), async (req, res) => {
 
 /* ---------- REGISTER PLAYER ---------- */
 app.post("/api/register", upload.single("photo"), async (req, res) => {
+
     try {
+
+        console.log(req.body);
+
         const player = await Player.create({
-            ...req.body,
-            leagueId: new mongoose.Types.ObjectId(req.body.leagueId),
+
+            name: req.body.name,
+            village: req.body.village,
+            role: req.body.role,
+
+            mobile: req.body.mobile,
+
+            tshirtSize: req.body.tshirtSize,
+
+            pantSize: req.body.pantSize,
+
+            leagueId: String(req.body.leagueId),
+
             photo: req.file?.path || "",
+
         });
 
         res.json(player);
 
     } catch (err) {
-        console.error("REGISTER PLAYER ERROR:", err);
-        res.status(500).json({ msg: err.message });
+
+        console.error("REGISTER ERROR:", err);
+
+        res.status(500).json({
+            msg: err.message,
+        });
     }
 });
 
