@@ -221,6 +221,11 @@ function Admin() {
                         >
                             ×
                         </span>
+                        <button
+                            onClick={() => editLeague(league)}
+                        >
+                            Edit
+                        </button>
 
                     </div>
                 ))}
@@ -259,11 +264,7 @@ function Admin() {
                             <button className="delete-round" onClick={() => deletePlayer(p._id)}>
                                 Delete
                             </button>
-                            <button
-                                onClick={() => editLeague(league)}
-                            >
-                                Edit
-                            </button>
+
                         </div>
 
                     </div>
