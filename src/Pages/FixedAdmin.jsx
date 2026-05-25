@@ -283,24 +283,29 @@ function FixedAdmin() {
                 `${BASE_URL}/api/leagues/${league._id}`,
                 {
                     method: "PUT",
+
                     headers: {
                         "Content-Type": "application/json",
                     },
+
                     body: JSON.stringify({
-                        ...league,
                         lastDate: newDate,
                     }),
                 }
             );
 
+            const data = await res.json();
+
+            console.log(data);
+
             if (!res.ok) {
-                alert("Update failed ❌");
+                alert(data.msg || "Update failed ❌");
                 return;
             }
 
             alert("League updated ✅");
 
-            loadLeagues();
+            fetchLeagues();
 
         } catch (err) {
 
@@ -361,7 +366,7 @@ function FixedAdmin() {
                             </button>
                             {/* ========== */}
                             <button
-                                onClick={() => editLeague(league)}
+                                onClick={() => editLeague(lg)}
                                 style={{
                                     marginRight: "10px",
                                     background: "#f59e0b",
