@@ -682,6 +682,34 @@ app.get("/api/teams/with-players/:leagueId", async (req, res) => {
     }
 });
 
+// ==================UPDATE==================
+app.put("/api/leagues/:id", async (req, res) => {
+
+    try {
+
+        const updatedLeague = await League.findByIdAndUpdate(
+            req.params.id,
+            {
+                name: req.body.name,
+                village: req.body.village,
+                entryFee: req.body.entryFee,
+                lastDate: req.body.lastDate,
+            },
+            { new: true }
+        );
+
+        res.json(updatedLeague);
+
+    } catch (err) {
+
+        console.error("UPDATE LEAGUE ERROR:", err);
+
+        res.status(500).json({
+            msg: err.message,
+        });
+    }
+});
+
 /* ================= PAYMENT ================= */
 
 const razorpay = new Razorpay({

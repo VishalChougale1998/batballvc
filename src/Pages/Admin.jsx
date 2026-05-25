@@ -48,6 +48,48 @@ function Admin() {
         const data = await res.json();
         setPlayers(data);
     };
+    // ======================EDIT LEAGUE=================
+    const editLeague = async (league) => {
+
+        const newDate = prompt(
+            "Enter new last date (YYYY-MM-DD)",
+            league.lastDate?.split("T")[0]
+        );
+
+        if (!newDate) return;
+
+        try {
+
+            const res = await fetch(
+                `${BASE_URL}/api/leagues/${league._id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        ...league,
+                        lastDate: newDate,
+                    }),
+                }
+            );
+
+            if (!res.ok) {
+                alert("Update failed ❌");
+                return;
+            }
+
+            alert("League updated ✅");
+
+            loadLeagues();
+
+        } catch (err) {
+
+            console.error(err);
+
+            alert("Update failed ❌");
+        }
+    };
 
     // ================= CREATE LEAGUE =================
 
@@ -216,6 +258,11 @@ function Admin() {
 
                             <button className="delete-round" onClick={() => deletePlayer(p._id)}>
                                 Delete
+                            </button>
+                            <button
+                                onClick={() => editLeague(league)}
+                            >
+                                Edit
                             </button>
                         </div>
 
