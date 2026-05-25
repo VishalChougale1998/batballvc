@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import League from "../models/League.js";
 
 const router = express.Router();
 
@@ -40,15 +41,32 @@ router.get("/:id", async (req, res) => {
 
 // UPDATE
 router.put("/:id", async (req, res) => {
+
     try {
-        const updated = await League.findByIdAndUpdate(
+
+        const updatedLeague = await League.findByIdAndUpdate(
             req.params.id,
-            req.body,
+            {
+                lastDate: req.body.lastDate,
+            },
             { new: true }
         );
-        res.json(updated);
+
+        if (!updatedLeague) {
+            return res.status(404).json({
+                msg: "League not found",
+            });
+        }
+
+        res.json(updatedLeague);
+
     } catch (err) {
-        res.status(500).json({ message: err.message });
+
+        console.error("UPDATE ERROR:", err);
+
+        res.status(500).json({
+            msg: err.message,
+        });
     }
 });
 
