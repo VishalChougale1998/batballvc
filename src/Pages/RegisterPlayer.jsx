@@ -407,10 +407,10 @@ function RegisterPlayer() {
     // ================= INPUT CHANGE =================
     const handleChange = (e) => {
 
-        setFormData({
-            ...formData,
+        setFormData((prev) => ({
+            ...prev,
             [e.target.name]: e.target.value,
-        });
+        }));
     };
 
     // ================= IMAGE CHANGE =================
