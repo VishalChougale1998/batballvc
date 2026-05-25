@@ -268,7 +268,47 @@ function FixedAdmin() {
             alert("Export failed ❌");
         }
     };
+    const editLeague = async (league) => {
 
+        const newDate = prompt(
+            "Enter new date (YYYY-MM-DD)",
+            league.lastDate?.split("T")[0]
+        );
+
+        if (!newDate) return;
+
+        try {
+
+            const res = await fetch(
+                `${BASE_URL}/api/leagues/${league._id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        ...league,
+                        lastDate: newDate,
+                    }),
+                }
+            );
+
+            if (!res.ok) {
+                alert("Update failed ❌");
+                return;
+            }
+
+            alert("League updated ✅");
+
+            loadLeagues();
+
+        } catch (err) {
+
+            console.error(err);
+
+            alert("Update failed ❌");
+        }
+    };
     return (
         <div className="hero-section admin-container">
 
@@ -319,6 +359,22 @@ function FixedAdmin() {
                             <button onClick={() => handleDeleteLeague(lg._id)}>
                                 ×
                             </button>
+                            {/* ========== */}
+                            <button
+                                onClick={() => editLeague(league)}
+                                style={{
+                                    marginRight: "10px",
+                                    background: "#f59e0b",
+                                    color: "white",
+                                    border: "none",
+                                    padding: "8px 12px",
+                                    borderRadius: "6px",
+                                    cursor: "pointer"
+                                }}
+                            >
+                                Edit Date
+                            </button>
+                            {/* ================= */}
 
                         </div>
                     ))}

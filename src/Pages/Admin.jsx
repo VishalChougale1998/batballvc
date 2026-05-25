@@ -221,12 +221,7 @@ function Admin() {
                         >
                             ×
                         </span>
-                        <button
-                            className="auction-btn"
-                            onClick={() => editLeague(league)}
-                        >
-                            Edit
-                        </button>
+
 
                     </div>
                 ))}
