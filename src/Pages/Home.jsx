@@ -65,7 +65,7 @@ function Home() {
                 {/* ...................... */}
                 {/* <div className="video-container">
                     <iframe
-                        src="https://www.youtube.com/embed/bmklhx9bgX4?si=PWDKwg4yV-OTIvqE"
+                        src="https://youtu.be/MOHzOZpAL9s?si=iWLVV2IfYZB5IKVt"
                         title="YouTube video player"
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -73,7 +73,9 @@ function Home() {
                         allowFullScreen
                     />
                 </div> */}
-
+                <div className="video-container">
+                    <iframe width="560" height="315" src="https://www.youtube.com/embed/MOHzOZpAL9s?si=iWLVV2IfYZB5IKVt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
                 {/* ............................ */}
             </div>
 
